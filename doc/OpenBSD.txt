@@ -1,0 +1,30 @@
+https://cdn.openbsd.org/pub/OpenBSD/snapshots/arm64/install70.img
+18:56 < kettenis> the mini works fine
+18:57 < kettenis> just remember that with the current DTB all machines default to serial console
+18:57 < kettenis> so you'll have to type "set tty fb0" at the boot> prompt
+19:13 < kettenis> but if you already have u-boot running, the standard instructions from INSTALL.arm64 are all you need
+
+set tty fb0
+boot
+
+Choose whole disk, but it will wipe any linux partitions
+
+Interface is bge0
+
+Hostname: ftp.eu.openbsd.org
+
+Firmware needs to go in /etc/firmware
+
+pkg_add -i bash gnupg vim sudo fvwm2 chromium mtr mpv
+
+halt -p
+
+echo 'set tty fb0' > /etc/boot.conf
+
+systat sensors
+
+# Login Manager X
+xenodm
+
+20:37 < kettenis> the files need to be renamed; it prints the name if wants at the end
+20:37 < kettenis> this will all change once the naming scheme that marcan came up with gets blessed by the Linux maintainers

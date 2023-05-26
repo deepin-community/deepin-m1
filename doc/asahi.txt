@@ -1,0 +1,11 @@
+# Export the control device for the proxyclient and friends
+export M1N1DEVICE=/dev/ttyACM0
+
+# chainload m1n1 so that you have the latest features available
+./proxyclient/tools/chainload.py build/m1n1.macho
+
+# Enable PCIe for wifi
+python3 ./proxyclient/experiments/pcie_enable_devices.py
+
+# Pick the dtb for your device: https://github.com/AsahiLinux/docs/wiki/Devices
+proxyclient/tools/linux.py --bootargs="net.ifnames=0 rw root=/dev/nvme0n1p5 rootwait rootfstype=ext4" ../linux/arch/arm64/boot/Image.gz ../linux/arch/arm64/boot/dts/apple/t8103-j293.dtb

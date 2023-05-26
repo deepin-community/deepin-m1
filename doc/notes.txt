@@ -1,0 +1,528 @@
+09:10 < j`ey> Glanzmann: `git rev-list 6f59bc24287..smc/work` that might work, not sure how it deals with merges. git rebase is the better way. but if you do that youre on your own!
+09:19 < _jannau_> Glanzmann: git rebase --onto 5.17-rc3 6f59bc24287
+09:23 < j`ey> if you add -p it can also preserve the merges
+
+19:13 < j`ey> but there's also CONFIG_OF_DMA_DEFAULT_COHERENT, which makes of_dma_is_coherent always return true
+
+21:02 < jannau> mps: you need https://lore.kernel.org/u-boot/20220208210215.8612-1-j@jannau.net/ for extlinux
+
+ARCH: 23:29 < ah-[m]> yep, exactly. I had to grub-mkconfig -o /boot/grub/grub.cfg, and move my Image.gz to /boot, otherwise it was just what was on the wiki page
+
+https://lore.kernel.org/linux-arm-kernel/20211011165707.138157-1-marcan@marcan.st/
+19:02 < jannau> I think based on this branch https://github.com/AsahiLinux/linux/tree/cpufreq/v1
+
+23:41 < kov> Glanzmann, hmm interesting, I'll try upgrading libinput firs then, see if that fixes it
+23:42 < kov> it's weird because I remember the trackpad working a while ago
+23:45 -!- mtjzh (~mtjzh@2a02:8388:1742:9b80:658f:93d3:ec68:d60e) has joined #asahi
+23:46 < kov> yep, just upgrading to testing's libinput makes it work heh thanks Glanzmann!
+
+Chromium 16KB patch: https://tg.st/u/Set-kernal-page-size-to-16K-on-loongson-MIPS-archtec.patch
+10:10 < jannau> see the commit message for 64k on ppc64 https://chromium.googlesource.com/chromium/src.git/+/445c099c6486b8e5ff8dafaefcd812a7ea4bdfff%5E%21/
+15:26 < tpw_rules> Glanzmann: https://pastebin.com/NzJEQJDW - https://tg.st/u/NzJEQJDW
+15:26 < tpw_rules> last i checked the built chromium only worked with the flags --in-process-gpu --no-sandbox --no-zygote but that may have been a kernel config problem
+Upstream BUG: https://bugs.webkit.org/show_bug.cgi?id=236564
+16:21 < tpw_rules> https://bugs.chromium.org/p/chromium/issues/detail?id=1301788
+
+22:39 < jannau> `dtc -I fs -O dts -o - /proc/device-tree` will output the device-tree as seen by linux
+
+19:11 < Glanzmann> axboe: Could you explain how to mark a device as write-through? Does that mean if I issue a sync in Linux that no flush will happen. Because this would be helpful for the m1 notebook owners to improve performance.
+19:11 < axboe> I just do: `echo "write through" > /sys/block/nvme0n1/queue/write_cache"` for now...
+19:11 < axboe> Glanzmann: ^^
+19:12 < axboe> Glanzmann: and yes, that's what it means
+19:12 < Glanzmann> axboe: Thanks.
+19:12 < axboe> Glanzmann: it'll bump your test case from 56 iops to 14k or something like that :)
+19:12 < axboe> alternatively, some sort of time based hack might make sense
+19:13 < axboe> "only issue flush if X seconds has passed since last issue"
+19:13 < axboe> kinda nasty, but safer
+
+15:50 < mps> axboe: Glanzmann: `libinput Disable While Typing Enabled (268):    1` is set in my case and it works fine
+15:51 < mps> though I built latest beta of libinput and rebuilt xf86-input-libinput with it
+15:52 < mps> i.e. libinput-1.19.901
+15:52 < axboe> mps: promising
+15:53 < mps> but still didn't got it to detect thumb
+16:07 < mps> Glanzmann: `libinput quirks list /dev/input/event1` will show you features of input device
+16:09 < mps> and `libinput quirks list /dev/input/event1` will show quirks from libinput database
+
+From mps:
+#!/bin/sh
+echo 2 > /sys/module/hid_apple/parameters/fnmode
+echo 1 > /sys/module/hid_apple/parameters/swap_fn_leftctrl
+echo 1 > /sys/module/hid_apple/parameters/swap_opt_cmd
+
+19:19 < Glanzmann> sven: Do you know why axboe set the admin queue to 2 instead of 8?
+19:19 < sven> yes
+19:19 < sven> almost all commands go through the io queue, no need to waste that space for the admin queue
+
+# j`ey on deleting efi and Linux partitions from the gui in macos
+20:46 < j`ey> Glanzmann: I didnt figure it out at the diskutil cli, but I managed to do it from the GUI, I think you have to erase/reformat as APFS before you can delete the volumes
+10:53 < j`ey> Glanzmann: for your notes: < tpw_rules> you can delete a non-apfs partition with: diskutil eraseVolume free n disk0sX
+21:07 < tpw_rules> you can delete a non-apfs partition with: diskutil eraseVolume free n disk0sX
+
+08:54 < mixi> Glanzmann: the command you're looking for should be "dtc -I dtb -O dts /sys/firmware/fdt"
+08:57 < jannau> Glanzmann: dtc -I fs -O dts -o - /proc/device-tree
+
+# j`ey on hack to hookup lid close/open
+23:19 < j`ey> apple_smc_event_received in drivers/platform/apple/smc_core.c is a good place to start looking
+
+# kettenis on the same issue using existing infrastructure
+23:20 < kettenis> so the lid is hooked up to gP01
+23:24 < kettenis> looks like you could try hooking that up using gpio-keys-polled
+23:27 < Glanzmann> kettenis: So gpio-keys-polled would poll gP01 and send a key event and than I could use my window manager to do something when that key event is received?
+23:29 < kettenis> look at arch/arm/boot/dts/imx6q-novena.dts
+
+# How to subscribe to smc events
+23:45 < j`ey> Glanzmann: if youre still interested in looking: drivers/power/supply/macsmc_power.c apple_smc_register_notifier(power->smc, &power->nb);
+23:46 < j`ey> so this driver gets called, when an SMC notification happens. looks like all registered handlers would be called and its up to the callback to figure out if it needs to do something
+
+# More background
+23:54 < kettenis> if the interrupts are hooked up correctly for thise SMC gpios, gpio-keys instead of gpio-keys-polled should work
+23:54 < j`ey> no irq_chip in the current driver
+
+17:34 <marcan> the image as built will have a real grub config with static UUIDs
+17:35 <marcan> well, a systemd early unit but yes
+
+{
+    "os_list": [
+        {
+            "name": "Asahi Linux reference distro (Arch Linux ARM)",
+            "default_os_name": "Asahi Linux",
+            "boot_object": "m1n1_uboot.bin",
+            "package": "asahi-alarm.zip",
+            "partitions": [
+                {
+                    "name": "EFI",
+                    "type": "EFI",
+                    "size": "512MB",
+                    "format": "fat",
+                    "volume_id": "0x03f103f1",
+                    "copy_firmware": true,
+                    "copy_installer_data": true,
+                    "source": "esp"
+                },
+                {
+                    "name": "Root",
+                    "type": "Linux",
+                    "size": "5GB",
+                    "expand": true,
+                    "image": "root.img"
+                }
+            ]
+        },
+        {
+            "name": "UEFI environment only (m1n1 + U-Boot + ESP)",
+            "default_os_name": "UEFI boot",
+            "boot_object": "m1n1_uboot.bin",
+            "partitions": [
+                {
+                    "name": "EFI",
+                    "type": "EFI",
+                    "size": "512MB",
+                    "format": "fat",
+                    "copy_firmware": true,
+                    "copy_installer_data": true
+                }
+            ]
+        },
+        {
+            "name": "Tethered boot (m1n1, for development)",
+            "default_os_name": "m1n1 proxy",
+            "expert": true,
+            "boot_object": "m1n1.bin",
+            "partitions": []
+        }
+    ]
+}
+
+cloud-initramfs-growroot
+16:00 < Glanzmann> So applying a new uuid to the rootfs needs to be done in the initrd.
+tune2fs -U random /dev/whatever
+
+07:54 < VinDuv> So I’ve been looking at how macOS installation from USB works on M1 Macs and I think it might be interesting for the Asashi installer. The way it works is that there’s a hidden plist file on the USB drive that references a macOS
+                application on the drive; if this file is present, the USB drive will show up in the power-button-held boot menu, and when selected, it will run the application. It doesn’t seem to care about file signature
+07:54 < VinDuv> (it works even if the app is just a shell script) and it looks like it’s in 1TR mode.
+07:56 < VinDuv> So the installation workflow from 1TR could be “plug in a USB stick, hold the power button, select Install Asahi” instead of having to manually open the terminal and run curl | sh. The installer doesn’t even need to be graphical since
+                it’s possible for the launched shell script to start the recovery environment’s Terminal and giving it an arbitrary command to run.
+07:59 < VinDuv> This is also not limited to external USB drives; it also works if the files are in an APFS volume in internal storage, which I guess might be useful to have a Asahi Recovery boot option in the boot menu or something.
+
+---- .IAPhysicalMedia ---------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AppName</key>
+	<string>Some App.app</string>
+	<key>ProductBuildVersion</key>
+	<string>00A191</string>
+	<key>ProductVersion</key>
+	<string>12.2.1</string>
+</dict>
+</plist>
+
+---- Some App.app/Contents/Info.plist -----------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Some App</string>
+	<key>CFBundleExecutable</key>
+	<string>SomeApp</string>
+</dict>
+</plist>
+
+---- Some App.app/Contents/Resources/<lang code>.lproj/InfoPlist.strings ------
+"CFBundleDisplayName" = "Some App";
+
+---- Some App.app/Contents/MacOS/SomeApp (executable) -------------------------
+#!/bin/bash
+exec /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal "${0%/*}/../Resources/myscript.command"
+
+---- Some App.app/Contents/Resources/myscript.command -------------------------
+#!/bin/sh
+
+echo "Hello, world!"
+exec /bin/bash
+
+
+19:14 <VinDuv> marcan: I have done a bit more testing with the .IAPhysicalMedia file and it looks like ProductBuildVersion can be any value including blank. ProductVersion seems to be checked against the minimal macOS version supported by the Mac; on my mini the icon shows up in the boot menu only if it’s >= 11.3.
+19:15 <VinDuv> Maybe it should be set to a higher value for forward compatibility with future Macs that will require 13.0? I’ve tested setting it to 99 and it works.
+
+21:46 < povik> with pulse, you can get the jack by getting into pacmd
+21:46 < povik> and running: load-module module-alsa-sink device=hw:0,1
+21:56 < povik> that mode of playing in parallel through the speakers and jack has a defect
+21:57 < povik> there's noise mixed-in then, at a period
+21:57 < povik> don't know how that happens yet
+When disabling the speakers, run rm -rf ~/.config/pulse/ and reboot otherwise the jack will be in the future off or 100% (which is too loud).
+
+
+If you see this in Xorg.0.log, it means that simpledrm has not initialized.
+...
+[     4.259] (EE) open /dev/dri/card0: No such file or directory
+...
+[     4.278] (EE) 
+[     4.278] (EE) Backtrace:
+[     4.278] (EE) 0: /usr/lib/xorg/Xorg (OsLookupColor+0x188) [0xaaaad26e0398]
+[     4.278] (EE) unw_get_proc_info failed: no unwind info found [-10]
+
+An initialized simpledrm looks like that:
+
+(air) [~] dmesg | grep -i simpledrm
+[    2.215718] [drm] Initialized simpledrm 1.0.0 20200625 for be2120000.framebuffer on minor 0
+[    2.218952] simple-framebuffer be2120000.framebuffer: [drm] fb1: simpledrmdrmfb frame buffer device
+
+This is probably because someone forgot to enable one of the following kernel options:
+
+CONFIG_BACKLIGHT_CLASS_DEVICE=y
+CONFIG_BACKLIGHT_GPIO=m
+CONFIG_DRM=y
+CONFIG_DRM_SIMPLEDRM=y
+CONFIG_FB_EFI=n
+
+-------------------------------------------------------------------------------------------------------------
+Howto convert from the old bootchain to the m1n1 chainloaded bootchain:
+
+(air) [~] parted /dev/nvme0n1 print
+Model: APPLE SSD AP0512Q (nvme)
+Disk /dev/nvme0n1: 500GB
+Sector size (logical/physical): 4096B/4096B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End    Size    File system  Name                  Flags
+ 1      24.6kB  524MB  524MB                iBootSystemContainer
+ 2      524MB   400GB  399GB                Container
+ 3      400GB   402GB  2501MB
+ 4      402GB   403GB  513MB   fat32                              boot, esp
+ 5      403GB   495GB  91.8GB  ext4         primary
+ 6      495GB   500GB  5369MB               RecoveryOSContainer
+
+I deleted partition 4 and 3, run the asahi installer again.
+
+Than I booted debian from the live stick and mounted the root filesystem and the efi file system:
+
+mount /dev/nvme0n1p5 /mnt
+mount /dev/nvme0n1p4 /mnt/boot/efi
+
+Than I bindmounted the rest of it:
+
+mount -t sysfs none /mnt/sys
+mount -t efivarfs none /mnt/sys/firmware/efi/efivars
+mount -t proc none /mnt/proc
+mount -o bind /dev /mnt/dev
+mount -o bind /dev/pts /mnt/dev/pts
+
+Than I changerooted into it:
+
+cd /mnt
+chroot . bin/bash
+
+blkid
+# Than I updated /etc/fstab with the new id of the efi partition
+
+curl -sLo /boot/efi/m1n1/boot.bin tg.st/u/u-boot.bin
+
+grub-install --removable /boot/efi
+
+exit, umounted everything and rebooted.
+-------------------------------------------------------------------------------------------------------------
+12:41 < chadmed> https://gist.github.com/chadmed/2c772c8fdac8280cb17846388203a213 <- some notes on the speaker system in the j314s, and an asound.conf that makes them sound... okay-ish for now
+
+## BEGIN NOTES ##
+
+# HOUSEKEEPING
+# All testing conducted with channels set to 40% in alsamixer,
+# with no amp gain.
+
+# Do NOT try to play sound with the speakers set to 100% in alsamixer,
+# you will fry the cones!
+
+# DRIVER MAPPINGS/ALSA QUIRKS
+# The speaker array as set up by the ASoC driver maps like
+# this on a J314s:
+# 0: Left Woofer 1
+# 1: Right Woofer 1
+# 2: Left Tweeter
+# 3: Right Tweeter
+# 4: Left (Sub)Woofer 2
+# 5: Right (Sub)Woofer 2
+
+# ALSA sets up the speaker array on the J314s as a 4.0 surround system,
+# with the RL and RR channels duplicated across the woofers like this:
+# 2: Front Left
+# 3: Front Right
+# 0: Rear Left
+# 1: Rear Right
+# 4: Rear Left
+# 5: Rear Right
+
+# Obviously this is not correct, but for us it does not matter, since
+# we can just tell ALSA to route FL and FR to all drivers, presenting
+# it to the rest of userspace as a stereo device. Surround sources
+# are downmixed appropriately.
+
+# SOUND CHECK
+# Testing reveals that drivers 4 and 5 are likely
+# only there to help with bass and sub bass. They
+# are extremely bad at reproducing frequencies above
+# ~500Hz, and even with the help of the tweeters sound
+# rough/deep fried in the mids. Drivers 0 and 1 are obviously
+# intended to be the main woofers in the array.
+
+# If we weren't intending to mimic whatever macOS does, my ear-only
+# testing would have me setting up a xover network like this:
+
+# Freq Range (Hz) | Drivers
+# 0-300 | 0 1 4 5
+# 300-6500 | 0 1
+# 6500-20000 | 2 3
+
+# Figures based on typical {LP,BP,HP}F rolloff characteristics.
+
+# Using all 4 woofers below 300Hz moves more air than just using the
+# (sub)woofers alone. 3-way loudspeakers work like this conventionally.
+
+# The ttable in the j314s-array pcm device tries to compensate for the lack of
+# EQ right now by greatly reducing the volume of 4 and 5, and slightly reducing
+# the volume of 0 and 1 relative to 2 and 3. I have found this gives an acceptably
+# clear sound without being too bright or losing too much out of the mids. Bass is
+# nonexistent, though I suspect this is just because we have not applied appropriate
+# correction to overcome the machine's housing yet. I will not be applying EQ or filtering
+# in ALSA using plugins even in the interim because
+# a) it's deprecated
+# b) it introduces overhead and chews up CPU time
+
+# FIRs can be applied to a 6 channel slave PCM which would then feed the routing table
+# PCM configured below with all coefficients set to 1
+
+## END NOTES ##
+
+# Create a six channel slave for the audio array
+pcm_slave.outputs {
+    pcm "hw:0,0"
+    channels 6
+}
+
+
+# We need to map L and R to the correct drivers. We can use
+# the coefficients in ttable to roughly tune the sound profile.
+pcm.j314s-array {
+    type route
+    slave outputs
+    ttable {
+        0.0 = 0.65
+        0.2 = 1
+        0.4 = 0.3
+        1.1 = 0.65
+        1.3 = 1
+        1.5 = 0.3
+    }
+}
+
+
+# Set up a plug and ctl interface for ALSA defaults
+# XXX: Does not work for PipeWire, but does work for JACK
+# and PulseAudio
+pcm.!default {
+    type plug
+    slave.pcm j314s-array
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+-------------------------------------------------------------------------------------------------
+
+# Control what happens after power loss
+/sys/devices/platform/soc/23e400000.smc/macsmc-reboot/ac_power_mode
+
+16k bugs
+========
+17:02 < kov> Glanzmann, https://bugs.webkit.org/show_bug.cgi?id=236564
+17:02 < kov> Glanzmann, that is already on the 2.34.6 stable release
+17:03 < kov> the gnome one was unrelated and is from a bunch of months ago, I have not seen any crashes in my testing with debian's gnome so I assume the fix is
+             already in
+17:04 < kov> it's this one https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/be8a1dcbfc7edf19ef13a63ddf034dba814ee000
+
+17:49 < j`ey> marcan: I learnt a new git command just now: git range-diff asahi/asahi-soc/prev..asahi asahi/asahi-soc/next..asahi/asahi good way to compare the
+              new/old branches even after a rebase
+17:49 < j`ey> (where 'asahi' is my local not-yet-updated branch)
+
+21:44 < kov> Glanzmann, trying to use the debian installer from your artefacts and getting a blank screen after the boot, any thoughts? (the consoles on tty2 etc come up)
+21:55 < kov> Glanzmann, hrm adding vga=normal fb=false to the kernel cmdline made it work
+
+07:19 < chadmed> Glanzmann: https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/2210
+07:47 < chadmed> pushed some changes to asahi-audio, should sound better than it did before now. FIRs are also installed to the directory i proposed in the feature request
+
+15:49 < j`ey> https://github.com/AsahiLinux/asahi-installer/blob/main/src/osinstall.py#L141
+15:49 < j`ey> cat m1n1.bin <(echo 'chainload=$ESP_UUID;$BOOT_OBJ_PATH') > blah.bin
+
+16:43 < povik> marcan: two fixes on top of 'asahi' that should make it into the release: https://github.com/povik/linux/commits/asahi-fixes
+
+# boot into 1tr
+diskutil list
+diskutil info <identifier of esp>
+curl -sLo tg.st/u/m1n1-rust.bin
+cat m1n1-rust.bin <(echo 'chainload=<ESP Partition UUID>;m1n1/boot.bin') <(echo 'chosen.asahi,efi-system-partition=<ESP Parition UUID>') > object.bin
+kmutil configure-boot -c object.bin --raw --entry-point 2048 --lowest-virtual-address 0 -v /Volumes/Linux
+
+20:29 < Glanzmann> One question though what is difference between chosen.asahi,efi-system-partition=EFI-PARTITION-PARTUUID and chainload=EFI-PARTITION-PARTUUID;m1n1/boot.bin?
+20:30 < jannau> chainload tell's the 1st stage m1n1 from where to load the second stage
+20:31 < jannau> chosen.asahi,efi-system-partition is added to the dt mostly to allow u-boot to boot from the correct ESP
+20:32 < Glanzmann> I see. Thank you for the elaboration.
+20:32 < jannau> chosen.asahi,efi-system-partition is passed from the 1st stage forward to the second stage
+20:33 < Glanzmann> I see, so the first stage informs the second stage about the uuid of the esp partition which is than passed using dt to u-boot which can than select the right esp to select the efi binary.
+
+17:25 < Jamie[m]1> I had a dumb idea and had to implement it: using http range requests and DEFLATE trickery to download Wifi firmware from Apple's CDN with only 18MB of transfer (out of a 13GB ipsw) http://github.com/JJJollyjim/firmware-abomination
+
+23:23 <@jannau> Glanzmann: on the mini vram can fit 5.5 million pixels, would be good for 3440x1600 or 3840x1433 at 32bpp
+
+11:37 < AdryzzOLEDEdition[m]> https://lists.gnu.org/archive/html/bug-gnu-emacs/2021-03/msg01260.html
+
+https://gist.github.com/rqou/2dafd40cfe0362cc84c3ee26c68b2b36
+
+https://arvanta.net/alpine/install-alpine-m1/
+21:48 < mps> Glanzmann: no, but /etc/local.d/$scriptname.start
+
+# geekbench
+16:08 <j`ey> looks like theres some results https://browser.geekbench.com/v5/cpu/13927518
+16:09 <j`ey> https://browser.geekbench.com/v5/cpu/search?utf8=%E2%9C%93&q=asahi
+16:10 <j`ey> jannau: https://www.geekbench.com/blog/2021/03/geekbench-54/
+16:14 <bluetail[m]> jannau: same m1 16 gb, 3000 more in multicore. How? https://browser.geekbench.com/v5/cpu/13856349
+16:18 <bluetail[m]> jannau: does it matter? I mean, it looks like we do have geekbench on arm linux...
+16:19 <bluetail[m]> https://www.geekbench.com/blog/2021/03/geekbench-54/
+16:24 <psydroid[m]1> https://browser.geekbench.com/v5/cpu/12429267
+16:25 <jannau> the multicore test doesn't scale well, here are results from a m1 ultra: https://browser.geekbench.com/v5/cpu/13932507
+16:31 <jannau> Chainfire: it's geekbench issue. kernel compiles are on the m1 ultra twice as fast as on the m1 max
+
+my air:  https://browser.geekbench.com/v5/cpu/13933197
+my mini: https://browser.geekbench.com/v5/cpu/13933401
+
+15:58 < kov> Glanzmann, jannau out of curiosity I ran geekbench on my Fedora VM under MacOS (M1 Max - 8 vcpus) https://browser.geekbench.com/v5/cpu/13951703
+
+# Browse the devicetree
+/proc/device-tree/chosen/asahi,efi-system-partition
+
+# mps mtrack configuration
+Section "InputClass"
+        MatchIsTouchpad "on"
+        Identifier      "Touchpads"
+        Driver          "mtrack"
+        Option          "Sensitivity" "0.15"
+        Option          "FingerHigh" "10"
+        Option          "FingerLow" "3"
+        Option          "IgnoreThumb" "true"
+        Option          "DisableOnThumb" "true"
+        Option          "DisableOnPalm" "true"
+        Option          "ThumbRatio" "60"
+        Option          "ThumbSize" "15"
+        Option          "IgnorePalm" "true"
+        Option          "TapButton1" "1"
+        Option          "TapButton2" "3"
+        Option          "TapButton3" "2"
+        Option          "TapButton4" "4"
+        Option          "ClickFinger1" "1"
+        Option          "ClickFinger2" "2"
+        Option          "ClickFinger3" "3"
+        Option          "ButtonMoveEmulate" "false"
+        Option          "ButtonIntegrated" "true"
+        Option          "ClickTime" "25"
+        Option          "BottomEdge" "30"
+        Option          "SwipeLeftButton" "8"
+        Option          "SwipeRightButton" "9"
+        Option          "SwipeUpButton" "0"
+        Option          "SwipeDownButton" "0"
+        Option          "SwipeDistance" "700"
+        Option          "ScrollCoastDuration" "500"
+        Option          "ScrollCoastEnableSpeed" "1"
+        Option          "ScrollUpButton" "4"
+        Option          "ScrollDownButton" "5"
+        Option          "ScrollLeftButton" "7"
+        Option          "ScrollRightButton" "6"
+        Option          "ScrollDistance" "250"
+        Option          "EdgeLeftSize" "0"
+EndSection
+
+14:26 < mps> Glanzmann: also github with guide is here https://github.com/p2rkw/xf86-input-mtrack
+14:27 < mps> Glanzmann: and this one helped me to understand some things https://int3ractive.com/blog/2018/make-the-best-of-macbook-touchpad-on-ubuntu/
+14:28 < j`ey> mps: what kinda 'swipes'?
+14:28 -!- bisko (~bisko@0002be12.user.oftc.net) has quit: Ping timeout: 480 seconds
+14:28 < mps> left and right, i.e, next and previous url in firefox
+14:28 < j`ey> ah cool
+14:29 < mps> this is enough for me (for now at least)
+14:30 -!- bisko (~bisko@0002be12.user.oftc.net) has joined #asahi
+14:30 < mps> there is also https://github.com/BlueDragonX/dispad which disables touchpad while typing
+14:32 < mps> but I have to find some time to learn better about all this touchpad options
+14:50 < mps> three fingers swipe left -> previous url, three finger swipe right -> next url
+
+# Old config:
+
+Section "InputClass"
+  Identifier "libinput touchpad catchall"
+  MatchIsTouchpad "on"
+  MatchDevicePath "/dev/input/event*"
+  Option "Tapping" "False"
+  Option "TappingDrag" "False"
+  Option "DisableWhileTyping" "True"
+  Option "AccelProfile" "adaptive"
+  Option "AccelSpeed" "0.3"
+  Option "AccelerationNumerator" "2"
+  Option "AccelerationDenominator" "1"
+  Option "AccelerationThreshold" "4"
+  Option "AdaptiveDeceleration" "2"
+  Option "NaturalScrolling" "0"
+        Option "TappingButtonMap" "lmr"
+        Option "ClickMethod" "clickfinger"
+  Driver "libinput"
+EndSection
+
+luks: https://g3la.de/hedgedoc/s/MIaCyVv1A#
+
+https://blog.devgenius.io/installing-gentoo-linux-in-apple-macbook-pro-m1-49e163534898
+
+07:53 < VinDuv> Glanzmann: I’ll be a bit busy until next week but if you want to play with my patch, it’s here: https://github.com/AsahiLinux/m1n1/pull/183
+07:54 < VinDuv> If you apply both patches and boot with display=wait,3840x2160, it should boot in 4k and m1n1 will say “waiting for monitor disconnect” and then wait 10 seconds
+07:59 < VinDuv> btw I’m working on a Python script that detects, from macOS, if a monitor disconnects during wakeup (so it needs m1n1 to wait) as well as its native resolution. If it works well and is integrated into the installer, it could autoconfigure the display= option in m1n1 during installation.
+
+14:34 < mps> Glanzmann: I use 'export MOZ_USE_XINPUT2=1' in system wide /etc/profile
+14:35 < mps> and checked out (disabled) smooth scroll in firefox

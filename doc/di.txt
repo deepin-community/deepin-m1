@@ -1,0 +1,16 @@
+# To find the device model
+(mini) [/sys] cat ./firmware/devicetree/base/model
+> [1] https://salsa.debian.org/installer-team/libdebian-installer/-/blob/master/src/system/subarch-arm64-linux.c
+
+# To fix grub installation
+> [2] https://salsa.debian.org/installer-team/grub-installer/-/blob/master/grub-installer#L696
+> [3] https://salsa.debian.org/installer-team/grub-installer/-/blob/master/grub-installer#L907
+
+# 64bit kernel
+> [4] https://salsa.debian.org/kernel-team/linux/-/tree/master/debian/config/arm64
+> [5] https://salsa.debian.org/kernel-team/linux/-/blob/master/debian/installer/kernel-versions
+
+# Todo:
+        - Hook wifi
+        - Fix agruments to grub installation when running on m1
+        - Hook kernel installation

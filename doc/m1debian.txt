@@ -1,0 +1,56 @@
+Video: https://tg.st/u/m1debian.mp4
+# Boot into macos
+diskutil apfs resizeContainer disk0s2 200GB
+
+curl -L https://mrcn.st/alxsh | sh
+
+curl -LO https://github.com/AsahiLinux/asahi-installer/archive/refs/heads/main.zip
+unzip main.zip
+cd asahi-installer-main/src
+cd /tmp/asahi-install
+# set paths
+/tmp/asahi-install/Frameworks/Python.framework/Versions/3.9/bin/python3 -m firmware.wifi /usr/share/firmware/wifi /Volumes/Linux/linux-firmware.tar
+
+- do not forget step2.sh
+
+curl -LO https://tg.st/u/u-boot.macho
+kmutil configure-boot -c u-boot.macho -v /Volumes/Linux
+
+diskutl list
+diskutil addPartition <identifier before free space> %EFI% LB 512MB
+diskutl list
+newfs_msdos /dev/<identifier of efi>
+mkdir -p /Volumes/efi
+mount -t msdos /dev/<identifier of efi> /Volumes/efi
+cd /Volumes/efi
+mkdir -p /Volumes/efi/efi/boot
+curl -Lo /Volumes/efi/efi/boot/bootaa64.efi https://tg.st/u/grubaa64.efi
+cp /Volumes/Linux/linux-firmware.tar /Volumes/Linux
+
+diskutl list
+diskutil addPartition <identifier before free space> %Linux% %noformat% <size>
+diskutl list
+curl -L https://tg.st/u/m1.tgz | tar -xOz | dd of=/dev/<identifier of Linux Filesystem>
+
+vi /etc/fstab
+
+# We deinstall grub-efi-arm64-signed- because it creates a file fbaa64.efi
+# which makes u-boot hang.
+apt-get install grub-efi grub-efi-arm64-signed-
+grub-install --target=arm64-efi --efi-directory=/boot/efi --removable
+# Set removable media to yes and nvram to no to make later grub updates work
+dpkg-reconfigure grub-efi-arm64
+
+update-initramfs -k all -c
+update-grub
+
+resize2fs <device of root filesystem>
+
+cd /etc/network/interfaces.d
+ip l s
+mv eth0 <interface>
+vim <interface>
+ifup <interface>
+
+vi /etc/passwd
+passwd root

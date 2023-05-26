@@ -1,0 +1,3 @@
+06:32 < ah-[m]> hey, I managed to get the keyboard backlight working, see last couple commits at https://github.com/ah-/linux/commits/kbd
+06:33 < ah-[m]> it's based on pipcets driver and docs from here: https://github.com/AsahiLinux/docs/wiki/HW%3AMacBook-Pro-keyboard-backlight-%28FPWM0%29, it still works on the t6000 machines with an updated address, and with a few more lines of dt gnome picks up the led device too
+06:34 < ah-[m]> I haven't done any kernel development in years, what's next towards getting this merged?

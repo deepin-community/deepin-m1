@@ -1,0 +1,288 @@
+Set root password
+=================
+passwd
+pwconv
+
+Configure wifi
+==============
+vi /etc/wpa/wpa_supplicant.conf
+ifup wlan0
+# remove the '#' before allow-hotplug to let wifi come up after boot
+vi /etc/network/interfaces
+
+Install openssh
+===============
+# Login for root is disabled by default. So you need another user
+sudo apt update
+sudo apt install -y openssh-server
+
+Configure timezone
+==================
+dpkg-reconfigure tzdata
+
+Create a user
+=============
+useradd -m -c 'firstname lastname' -s /bin/bash username
+passwd username
+
+Lightweight desktop
+===================
+apt-get update
+apt-get install lightdm blackbox xterm firefox-esr big-cursor
+/etc/init.d/lightdm start
+
+Install gnome
+=============
+apt-get update
+apt-get install gnome
+/etc/init.d/gdm3 start
+
+Disable sleep, hibernate and suspend targets
+============================================
+# asahi does not handle sleep well at the moment
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+Xorg
+====
+
+# Keyboard use capslock as additional ctrl
+cat > /etc/X11/xorg.conf.d/00-keyboard.conf <<'EOF'
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "us"
+        Option "XkbModel" "pc105"
+        Option "XkbVariant" "de_se_fi"
+        Option "XkbOptions" "ctrl:nocaps"
+EndSection
+EOF
+
+# Swap command and option (windows and alt like on a pc keyboard)
+echo 1 > /sys/module/hid_apple/parameters/swap_opt_cmd
+
+# Configure the touchpad
+cat > /etc/X11/xorg.conf.d/30-input.conf <<'EOF'
+Section "InputClass"
+  Identifier "libinput touchpad catchall"
+  MatchIsTouchpad "on"
+  MatchDevicePath "/dev/input/event*"
+  Option "Tapping" "False"
+  Option "TappingDrag" "False"
+  Option "DisableWhileTyping" "True"
+  Option "AccelProfile" "adaptive"
+  Option "AccelSpeed" "0.3"
+  Option "AccelerationNumerator" "2"
+  Option "AccelerationDenominator" "1"
+  Option "AccelerationThreshold" "4"
+  Option "AdaptiveDeceleration" "2"
+  Option "NaturalScrolling" "0"
+        Option "TappingButtonMap" "lmr"
+        Option "ClickMethod" "clickfinger"
+  Driver "libinput"
+EndSection
+EOF
+
+Install latest kernel and m1n1 stage 2 (m1n1, dtbs, u-boot)
+===========================================================
+curl -sL tg.st/u/ksh | sudo bash
+
+Use the live system to install debian
+=====================================
+
+parted -a optimal /dev/nvme0n1 print free
+parted -a optimal /dev/nvme0n1 mkpart primary ext4 <begin of free> <end of free>
+tune2fs -O extents,uninit_bg,dir_index -m 0 -c 0 -i 0 /dev/nvme0n1p5
+
+mount /dev/nvme0n1p5 /mnt
+
+debootstrap --arch=arm64 testing /mnt http://deb.debian.org/debian
+
+mount -t sysfs none /mnt/sys
+mount -t efivarfs none /mnt/sys/firmware/efi/efivars
+mount -t proc none /mnt/proc
+mount -o bind /dev /mnt/dev
+mount -o bind /dev/pts /mnt/dev/pts
+
+mkdir -p /mnt/boot/efi
+mount /dev/nvme0n1p4 /mnt/boot/efi
+
+cd /mnt
+chroot . bin/bash
+
+cat <<EOF > /etc/fstab
+/dev/nvme0n1p5 /         ext4 defaults 0 0
+/dev/nvme0n1p4 /boot/efi vfat defaults 0 0
+EOF
+
+cat <<EOF > /etc/apt/sources.list
+deb http://deb.debian.org/debian testing main contrib non-free
+deb-src http://deb.debian.org/debian testing main contrib non-free
+EOF
+
+apt update
+apt-get -y install initramfs-tools pciutils wpasupplicant tcpdump vim tmux vlan ntpdate parted curl wget grub-efi-arm64 mtr-tiny dbus ca-certificates sudo openssh-client mtools gdisk firmware-linux cryptsetup
+
+apt-get install -y grub-efi-arm64-signed-
+echo 'grub-efi-arm64 grub2/update_nvram boolean false' | debconf-set-selections
+echo 'grub-efi-arm64 grub2/force_efi_extra_removable boolean true' | debconf-set-selections
+dpkg-reconfigure -fnoninteractive grub-efi-arm64
+update-grub
+grub-install --removable /boot/efi
+
+echo 'nameserver 8.8.8.8' > /etc/resolv.conf
+
+export HOSTNAME=debian
+echo $HOSTNAME > /etc/hostname
+cat <<EOF > /etc/hosts
+127.0.0.1 localhost $HOSTNAME
+EOF
+
+cat <<EOF > /etc/wpa_supplicant/wpa_supplicant.conf
+network={
+        ssid="ssid"
+        scan_ssid=1
+        key_mgmt=WPA-PSK
+        psk="password"
+}
+EOF
+
+passwd
+
+tar -C /lib/firmware/ -xf /boot/efi/vendorfw/firmware.tar
+
+cat <<EOF > /etc/network/interfaces
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# Include files from /etc/network/interfaces.d:
+source /etc/network/interfaces.d/*
+
+allow-hotplug eth0
+iface eth0 inet dhcp
+
+# allow-hotplug wlan0
+iface wlan0 inet dhcp
+        wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+EOF
+
+curl -sLo /tmp/k.deb tg.st/u/k.deb
+curl -sLo /boot/efi/m1n1/boot.bin tg.st/u/u-boot.bin
+dpkg -i /tmp/k.deb
+
+exit
+
+cd /
+umount /mnt/boot/efi
+umount /mnt/sys/firmware/efi/efivars
+umount /mnt/sys
+umount /mnt/proc
+umount /mnt/dev/pts
+umount /mnt/dev
+umount /mnt
+reboot
+
+Repack live
+===========
+You might want to save the state of your live system to the usb stick. In order
+to do so, run the following commands:
+
+apt update
+apt-get install -y cpio pigz
+rm /etc/rc.local
+# remove '#' before allow-hotplug
+vi /etc/network/interfaces
+mount /dev/sda1 /mnt
+mv /mnt/initrd.gz /mnt/initrd.old
+cd /
+find . -xdev | cpio --quiet -H newc -o | pigz -9 > /mnt/initrd.gz
+umount /mnt
+
+iwd
+===
+With iwd you can force to use 5ghz. The following needs to be done to get iwd
+running.
+
+sudo apt-get update
+sudo apt-get install iwd
+
+cat <<EOF > /etc/iwd/main.conf
+[Rank]
+        BandModifier5Ghz=10
+EOF
+
+# Remove or comment out the following interfaces from /etc/network/interfaces
+# allow-hotplug wlp1s0f0
+# iface wlp1s0f0 inet dhcp
+#         wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+# Add the following interfaces to /etc/network/interfaces
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+
+# Reboot
+reboot
+
+# Configure iwd:
+sudo iwctl
+device list
+station wlan0 scan
+station wlan0 get-networks
+station wlan0 connect SSID
+
+Deinstall Linux
+===============
+# Lets assume you have the following partioning
+
+(mini) [~] sudo parted /dev/nvme0n1 print
+Model: APPLE SSD AP0256Q (nvme)
+Disk /dev/nvme0n1: 251GB
+Sector size (logical/physical): 4096B/4096B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End    Size    File system  Name                  Flags
+ 1      24.6kB  524MB  524MB                iBootSystemContainer
+ 2      524MB   101GB  100GB
+ 3      101GB   103GB  2500MB
+ 4      103GB   104GB  513MB   fat32                              boot, esp
+ 5      104GB   246GB  142GB   ext4
+ 6      246GB   251GB  5369MB               RecoveryOSContainer
+
+# Never delete the first, the second and the last partition because that either
+# renders your mac unbootable (first two) or unupgradable (last one). However
+# you can recover the system by using a second system if you screw up.
+
+# In the above example we need to delete the partition number 3 (stub partition
+# you can identify it by the size 2500 MB). The partition 4 (you can identtify
+# it by the fact that it is fat32 and the flags boot, esp). And the partition
+# number 5 (you can identify it by the fact that it is ext4).
+
+You delete the partitions by doing:
+
+# n is the partition number
+sudo parted /dev/nvme0n1 rm <n>
+
+# If you're asked if you want to proceed, say 'y'. If your asked if you want to
+# ignore, say, ignore.
+
+Control Charging
+================
+# Do not charge
+echo inhibit-charge > /sys/class/power_supply/macsmc-battery/charge_behaviour
+
+# Default
+echo auto > /sys/class/power_supply/macsmc-battery/charge_behaviour
+
+# Force discharge
+echo force-discharge > /sys/class/power_supply/macsmc-battery/charge_behaviour
+
+# Find out which device tree you're using
+cat /proc/device-tree/compatible
+
+# Bluetooth
+https://g3la.de/hedgedoc/s/MIaCyVv1A#Bluetooth
+
+# Set Firefox as default browser
+xdg-mime default firefox-esr.desktop x-scheme-handler/https x-scheme-handler/http
+
+Get it running with debian and crypto file system
+=================================================
+https://g3la.de/hedgedoc/buDIXGBuRzKMwUnYOpStuw#

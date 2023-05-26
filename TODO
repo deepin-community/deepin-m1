@@ -1,0 +1,2 @@
+[ ] Check if /boot/esp is mounted otherwise bail on error, for bootstrap check for the file '/debootstrap'
+[ ] Re-enable crosscompilation for m1n1_uboot_kernel.sh

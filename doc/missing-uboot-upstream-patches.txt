@@ -1,0 +1,2 @@
+https://patchwork.ozlabs.org/project/uboot/list/?submitter=70743
+16:44 < jannau> by applying the changes from f9753ef3e94eb416dbe017c88f8939d2fc3f0f28 and 02468d323e6fc040f4b12346c8ae97209e195939 manually to the .dtsi files in u-boot
