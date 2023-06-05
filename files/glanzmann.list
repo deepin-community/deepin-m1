@@ -1,1 +1,2 @@
-deb https://thomas.glanzmann.de/asahi testing main
+# temporarily disable this repo for desktop environment
+# deb https://thomas.glanzmann.de/asahi testing main

@@ -29,12 +29,10 @@ build_linux()
 {
 (
         handle_crosscompile
-        test -d linux || git clone https://github.com/AsahiLinux/linux
+        test -d linux || git clone --depth=1 https://github.com/AsahiLinux/linux
         cd linux
         git fetch -a -t
-        git reset --hard origin/asahi-wip;
-        curl -sL https://tg.st/u/5ec32cdb6555bf935fd621ef8923410a1f51b5b9.patch | git am -
-        curl -sL https://tg.st/u/c65f0ecca767f7853bf33f1710d7637f11b70403.patch | git am -
+        git checkout asahi-6.3-7;
         cat ../../config.txt > .config
         make LLVM=${CLANG_VERSION} rustavailable
         make LLVM=${CLANG_VERSION} olddefconfig
@@ -48,7 +46,7 @@ build_m1n1()
         test -d m1n1 || git clone --recursive https://github.com/AsahiLinux/m1n1
         cd m1n1
         git fetch -a -t
-        git reset --hard v1.2.7-7-g076217a;
+        git reset --hard v1.2.9;
         make -j `nproc`
 )
 }
@@ -60,7 +58,7 @@ build_uboot()
         test -d u-boot || git clone https://github.com/AsahiLinux/u-boot
         cd u-boot
         git fetch -a -t
-        git reset --hard asahi-v2023.01-3;
+        git reset --hard asahi-v2023.04-2;
 
         make apple_m1_defconfig
         make -j `nproc`
@@ -71,7 +69,7 @@ build_uboot()
 package_boot_bin()
 {
 (
-        export M1N1_VERSION=1.2.7-3
+        export M1N1_VERSION=1.2.9
         rm -rf m1n1_${M1N1_VERSION}_arm64
         mkdir -p m1n1_${M1N1_VERSION}_arm64/DEBIAN m1n1_${M1N1_VERSION}_arm64/usr/lib/m1n1/
         cp u-boot.bin m1n1_${M1N1_VERSION}_arm64/usr/lib/m1n1/boot.bin

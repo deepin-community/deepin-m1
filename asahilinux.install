@@ -8,11 +8,10 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-export REPO_BASE="protocol://hostname:port/path/to/repo"
+export REPO_BASE="https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/"
 export VERSION_FLAG=https://cdn.asahilinux.org/installer/latest
 export INSTALLER_BASE=https://cdn.asahilinux.org/installer
 export INSTALLER_DATA="$REPO_BASE"/installer_data.json
-export INSTALLER_DATA_ALT=https://alx.sh/installer_data.json
 
 #TMP="$(mktemp -d)"
 TMP=/tmp/asahi-install
