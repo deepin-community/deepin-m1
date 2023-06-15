@@ -50,7 +50,9 @@ Asahi Linux Debian installer: https://git.zerfleddert.de/cgi-bin/gitweb.cgi/m1-d
 
 deepin ci仓库有提供现成的安装脚本。当然，你也可以通过自行搭建安装仓库的方法自行安装。
 
-#### 使用Deepin的安装仓库
+如果你不怕麻烦的话，也可以通过仅安装官方m1n1+uboot引导的方式，通过插入写好特制内容的deepin安装盘进行安装。
+
+### 使用Deepin的安装仓库
 
 在MacOS上打开Terminal，然后，运行以下命令执行安装脚本。
 
@@ -60,7 +62,9 @@ curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | s
 
 - 注意，跑完脚本后，它会让你关机．(Mac Mini)开机时，长摁开机键直至出现启动菜单．选择deepin，然后跟着脚本走来设置deepin为默认的启动项．
 
-#### 自行搭建安装仓库
+
+
+### 自行搭建安装仓库
 
 ##### 准备工作
 
@@ -112,6 +116,47 @@ curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | s
    ```
 
 2. 跟着脚本走就是了．:)
+
+
+
+### 使用deepin 23 for M1安装盘
+
+这里所说的deepin安装盘可**不是给通常机器安装使用的iso镜像盘。**只需要在U盘上**创建一个FAT分区**并**将安装内容写入根目录**即可。
+
+具体步骤如下：
+
+- 创建安装盘
+
+  - 按照m1-debian的介绍，运行一下命令创建分区。
+
+    ```bash
+    # 替换成你U盘的对应设备
+    DEVICE=/dev/sdX
+    sudo parted -a optimal $DEVICE mklabel msdos
+    sudo parted -a optimal $DEVICE mkpart primary fat32 2048s 100%
+    sudo mkfs.vfat ${DEVICE}1
+    sudo mount ${DEVICE}1 /mnt
+    ```
+
+  - 在[这里](https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin-m1-usb-installer.zip)下载安装盘压缩包，并解压到**U盘FAT分区**的**根目录**。
+
+- 在Mac上安装m1n1+uboot引导。(Asahi Linux官方安装脚本选第三项UEFI environment only, m1n1+uboot+esp)
+
+  ```bash
+  curl https://alx.sh/ | sh
+  ```
+
+- 像上面脚本一样，跟着脚本走，安装引导系统并设置默认启动项。
+
+- 像正常安装一样，插入U盘并开机。如果没识别U盘，在U-Boot界面跑usb reset命令刷新一下。
+
+- 进行安装时，请选择**自定义安装，并选择空闲磁盘空间进行安装**。
+
+**(!!!请不要选择全盘安装模式或高级安装。这样会导致抹除原来的MacOS系统和引导，使机器变砖，只能线刷救回。!!!)**
+
+**(!!!请不要选择全盘安装模式或高级安装。这样会导致抹除原来的MacOS系统和引导，使机器变砖，只能线刷救回。!!!)**
+
+**(!!!请不要选择全盘安装模式或高级安装。这样会导致抹除原来的MacOS系统和引导，使机器变砖，只能线刷救回。!!!)**
 
 
 
