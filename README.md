@@ -61,6 +61,7 @@ curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | s
 ```
 
 - 注意，跑完脚本后，它会让你关机．(Mac Mini)开机时，长摁开机键直至出现启动菜单．选择deepin，然后跟着脚本走来设置deepin为默认的启动项．
+- deepin系统默认用户 hiweed, 密码为 1
 
 
 
