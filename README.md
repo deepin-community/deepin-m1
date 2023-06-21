@@ -171,6 +171,27 @@ base包的话，大概需要安装dde-session-ui, deepin-desktop-environment-cor
 
 (从deepin-base包安装桌面环境时，可能可以使用声音，但重启之后失效。)
 
+同时，当前桌面环境存在以下已知问题：
+
+- 系统GPU加速无法使用，可能导致一些应用发生异常。例如，Chromium无法正常启动。
+- 系统无法识别任何声音设备，导致无声音播放功能。只有小概率下，刚安装完成时才会有声音。
+- USB安装方式只能使用自定义安装，不能动任何已有分区。否则机器会变砖。
+- 如果长时间不动鼠标，会导致其被休眠而无法使用。这个时候需要点击鼠标按键才能重新使用。
+- 重启后桌面无壁纸
+- 插入网线，显示网线未接入
+- 没有休眠功能
+- 引导界面按键盘无响应
+- 时间显示错误，没有同步时间
+- 没有蓝牙模块，且蓝牙不可用
+- 系统版本为 beta,但是控制中心出现更新 beta版本的发布日志更新
+- 应用商店中无应用
+- 修改亮度无效果
+- 调节色温无效果
+- 深度之家标题栏错位重叠
+- 无线网络未识别，无法使用
+- 文件管理器中无法挂载其他操作系统的分区
+- 桌面异常卡死
+
 ## FAQ
 
 #### Q: 我重启之后，local policy update的时候没跑完就忽然黑屏重启了．
@@ -178,3 +199,7 @@ base包的话，大概需要安装dde-session-ui, deepin-desktop-environment-cor
 A: 参考https://asahilinux.org/2022/03/asahi-linux-alpha-release/#how-do-i-uninstall-it . 简单来说，你需要在recoveryOS或者禁用SIP的情况下，跑官方的cleanbp.sh脚本去清启动策略．
 
 recoveryOS呼出terminal方法：shift+win+t (普通en_US键盘)
+
+#### Q: 如何卸载安装好的Linux系统？
+
+A: 可以使用https://github.com/AsahiLinux/asahi-installer/blob/main/tools/wipe-linux.sh 脚本。
