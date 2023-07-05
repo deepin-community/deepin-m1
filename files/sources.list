@@ -4,8 +4,7 @@ deb [trusted=yes] https://ci.deepin.com/repo/obs/deepin:/Develop:/dde/deepin_dev
 deb [trusted=yes] https://ci.deepin.com/repo/obs/deepin:/Develop:/community/deepin_develop/ ./
 deb [trusted=yes] https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/ asahi main
 
-#deb [trusted=yes] http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+# deb [trusted=yes] http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
 # deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
-
 # deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
 # deb-src http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware

@@ -44,7 +44,7 @@ build_rootfs()
         sudo cp ../../files/30-modeset.conf etc/X11/xorg.conf.d/30-modeset.conf
         sudo cp ../../files/blacklist.conf etc/modprobe.d/
 
-        sudo perl -p -i -e 's/"quiet"/"net.ifnames=0"/ if /^GRUB_CMDLINE_LINUX_DEFAULT=/' etc/default/grub
+        sudo cp ../../files/grub etc/default/grub
         sudo -- perl -p -i -e 's/root:x:/root::/' etc/passwd
 
         sudo -- ln -s lib/systemd/systemd init
@@ -81,7 +81,7 @@ build_efi()
         export UUID=`blkid -s UUID -o value media`
         cat > EFI/debian/grub.cfg <<EOF
 search.fs_uuid ${UUID} root
-linux (\$root)/boot/${VMLINUZ} root=UUID=${UUID} rw net.ifnames=0
+linux (\$root)/boot/${VMLINUZ} root=UUID=${UUID} rw net.ifnames=0 usbcore.autosuspend=-1
 initrd (\$root)/boot/${INITRD}
 boot
 EOF
