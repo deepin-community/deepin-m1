@@ -108,7 +108,7 @@ build_desktop_rootfs_image()
 	sudo mount devpts-live -t devpts -o gid=5,mode=620 ${CHROOT}/dev/pts || true
 	sudo mount sysfs-live -t sysfs ${CHROOT}/sys
 	sudo chroot testing apt update
-	sudo chroot testing apt install -y lightdm xserver-xorg deepin-desktop-environment-core deepin-desktop-environment-base deepin-desktop-environment-extras libssl-dev firefox
+	sudo chroot testing apt install -y lightdm xserver-xorg deepin-desktop-environment-cli deepin-desktop-environment-core deepin-desktop-environment-base deepin-desktop-environment-extras libssl-dev firefox
 	sudo chroot testing apt clean
 	sudo rm testing/var/lib/apt/lists/* || true
 

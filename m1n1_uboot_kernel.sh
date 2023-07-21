@@ -9,9 +9,9 @@ set -o xtrace
 
 cd "$(dirname "$0")"
 
-export CARGO_HOME="$(pwd)/build/cargo"
-export RUSTUP_HOME="$(pwd)/build/rust"
-source "$(pwd)/build/cargo/env"
+export CARGO_HOME="$HOME/.cargo/bin"
+export LLVM_HOME="/usr/lib/llvm-14/bin"
+export PATH=$CARGO_HOME:$LLVM_HOME:$PATH
 
 unset LC_CTYPE
 unset LANG
@@ -29,10 +29,8 @@ build_linux()
 {
 (
         handle_crosscompile
-        test -d linux || git clone --depth=1 https://github.com/AsahiLinux/linux
+        test -d linux || git clone --depth=1 -b asahi-6.3-13 https://github.com/AsahiLinux/linux
         cd linux
-        git fetch -a -t
-        git checkout asahi-6.3-7;
         cat ../../config.txt > .config
         make LLVM=${CLANG_VERSION} rustavailable
         make LLVM=${CLANG_VERSION} olddefconfig
@@ -43,10 +41,8 @@ build_linux()
 build_m1n1()
 {
 (
-        test -d m1n1 || git clone --recursive https://github.com/AsahiLinux/m1n1
+        test -d m1n1 || git clone --depth=1 -b v1.2.9 --recursive https://github.com/AsahiLinux/m1n1
         cd m1n1
-        git fetch -a -t
-        git reset --hard v1.2.9;
         make -j `nproc`
 )
 }
@@ -55,10 +51,8 @@ build_uboot()
 {
 (
         handle_crosscompile
-        test -d u-boot || git clone https://github.com/AsahiLinux/u-boot
+        test -d u-boot || git clone --depth=1 -b asahi-v2023.04-2 https://github.com/AsahiLinux/u-boot
         cd u-boot
-        git fetch -a -t
-        git reset --hard asahi-v2023.04-2;
 
         make apple_m1_defconfig
         make -j `nproc`
@@ -100,8 +94,8 @@ EOF
 )
 }
 
-if type clang-15; then
-        export CLANG_VERSION=-15
+if type clang-14; then
+        export CLANG_VERSION=-14
 elif type clang-11; then
         export CLANG_VERSION=-11
 fi
