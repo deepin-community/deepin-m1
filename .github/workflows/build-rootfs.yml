@@ -1,0 +1,22 @@
+name: Build rootfs
+
+on: [push, pull_request]
+
+jobs:
+  build-zip:
+    name: Build zip file
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone deepin-m1 repository 
+        uses: actions/checkout@v2
+      - name: Prepare keyring
+        run: |
+          wget https://community-packages.deepin.com/deepin/pool/main/d/deepin-keyring/deepin-keyring_2021.06.07.orig.tar.xz
+          tar -xvf deepin-keyring_2021.06.07.orig.tar.xz
+          sudo cp deepin-keyring-2021.06.07/keyrings/deepin-archive-camel-keyring.gpg /usr/share/keyrings/deepin-archive-camel-keyring.gpg
+      - name: Install dependencies
+        run: sudo apt install qemu qemu-user-static binfmt-support eatmydata debootstrap pigz
+      - name: Prepare debootstrap script
+        run: sudo cp /usr/share/debootstrap/scripts/bookworm /usr/share/debootstrap/scripts/beige
+      - name: Build zip files
+        run: sudo bash bootstrap.sh
