@@ -64,7 +64,7 @@ build_dd()
         mkfs.ext4 media
         tune2fs -O extents,uninit_bg,dir_index -m 0 -c 0 -i 0 media
         sudo mount -o loop media mnt
-	sudo rsync -axv --info=progress2 testing/ mnt/
+	sudo rsync -ax --info=progress2 testing/ mnt/
         sudo rm -rf mnt/init mnt/boot/efi/m1n1
         sudo umount mnt
 )
@@ -127,7 +127,7 @@ build_desktop_rootfs_image()
 	resize2fs -p media
 
 	sudo mount -o loop media mnt
-	sudo rsync -axv --info=progress2 testing/ mnt/
+	sudo rsync -ax --info=progress2 testing/ mnt/
         sudo rm -rf mnt/init mnt/boot/efi/m1n1
         sudo umount mnt
 	
