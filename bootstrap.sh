@@ -59,7 +59,7 @@ build_dd()
 {
 (
         rm -f media
-        fallocate -l 3G media
+        fallocate -l 10G media
         mkdir -p mnt
         mkfs.ext4 media
         tune2fs -O extents,uninit_bg,dir_index -m 0 -c 0 -i 0 media
@@ -120,11 +120,6 @@ build_desktop_rootfs_image()
 	sudo umount -l ${CHROOT}/proc
 	sudo umount -l ${CHROOT}/dev/pts
 	sudo umount -l ${CHROOT}/sys
-
-	# resize rootfs
-	fallocate -l 10G media
-	e2fsck -f media
-	resize2fs -p media
 
 	sudo mount -o loop media mnt
 	sudo rsync -ax --info=progress2 testing/ mnt/
