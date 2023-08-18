@@ -20,7 +20,7 @@
                 {
                     "name": "Root",
                     "type": "Linux",
-                    "size": "10GB",
+                    "size": "15GB",
                     "expand": true,
                     "image": "media"
                 }
@@ -46,7 +46,7 @@
                 {
                     "name": "Root",
                     "type": "Linux",
-                    "size": "10GB",
+                    "size": "15GB",
                     "expand": true,
                     "image": "media"
                 }

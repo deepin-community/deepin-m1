@@ -18,8 +18,8 @@ MIRROR=https://community-packages.deepin.com/beige/
 build_rootfs()
 {
 (
-        sudo rm -rf testing
         mkdir -p cache
+	sudo mount -o loop media testing
 	sudo eatmydata ${DEBOOTSTRAP} --keyring /usr/share/keyrings/deepin-archive-camel-keyring.gpg --cache-dir=`pwd`/cache --arch=arm64 --include bash-completion,clang,fish,pciutils,wpasupplicant,vim,tmux,curl,wget,grub-efi-arm64,ca-certificates,sudo,openssh-client,gdisk,cryptsetup,wireless-regdb,zsh,zstd beige testing $MIRROR
 
         cd testing
@@ -59,14 +59,13 @@ build_dd()
 {
 (
         rm -f media
-        fallocate -l 10G media
-        mkdir -p mnt
+        fallocate -l 15G media
+        mkdir -p testing
         mkfs.ext4 media
         tune2fs -O extents,uninit_bg,dir_index -m 0 -c 0 -i 0 media
-        sudo mount -o loop media mnt
-	sudo rsync -ax --info=progress2 testing/ mnt/
-        sudo rm -rf mnt/init mnt/boot/efi/m1n1
-        sudo umount mnt
+        sudo mount -o loop media testing
+        sudo rm -rf testing/init testing/boot/efi/m1n1
+        sudo umount testing
 )
 }
 
@@ -96,6 +95,7 @@ build_asahi_installer_image()
         cp -a EFI aii/esp/
         cp testing/usr/lib/m1n1/boot.bin aii/esp/m1n1/boot.bin
         ln media aii/media
+	sudo umount media
         cd aii
         zip -r9 ../deepin-base.zip esp media
 )
@@ -104,6 +104,7 @@ build_asahi_installer_image()
 build_desktop_rootfs_image()
 {
 	CHROOT=testing
+	sudo mount -o loop media ${CHROOT}
 	sudo mount proc-live -t proc ${CHROOT}/proc
 	sudo mount devpts-live -t devpts -o gid=5,mode=620 ${CHROOT}/dev/pts || true
 	sudo mount sysfs-live -t sysfs ${CHROOT}/sys
@@ -121,15 +122,14 @@ build_desktop_rootfs_image()
 	sudo umount -l ${CHROOT}/dev/pts
 	sudo umount -l ${CHROOT}/sys
 
-	sudo mount -o loop media mnt
-	sudo rsync -ax --info=progress2 testing/ mnt/
-        sudo rm -rf mnt/init mnt/boot/efi/m1n1
-        sudo umount mnt
+        sudo rm -rf ${CHROOT}/init ${CHROOT}/boot/efi/m1n1
 	
 	rm -rf aii
         mkdir -p aii/esp/m1n1
         cp -a EFI aii/esp/
         cp testing/usr/lib/m1n1/boot.bin aii/esp/m1n1/boot.bin
+        sudo umount ${CHROOT}
+
         ln media aii/media
         cd aii
         zip -r9 ../deepin-desktop.zip esp media
@@ -138,8 +138,8 @@ build_desktop_rootfs_image()
 mkdir -p build
 cd build
 
-build_rootfs
 build_dd
+build_rootfs
 build_efi
 build_asahi_installer_image
 build_desktop_rootfs_image
