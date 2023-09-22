@@ -1,11 +1,26 @@
 name: Build rootfs
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * mon'
 
 jobs:
+  once:
+    name: Generate Envs
+    runs-on: ubuntu-latest
+    outputs:
+        timestamp: ${{ steps.get-timestamp.outputs.timestamp }}
+    steps:
+      - name: get timestamp
+        id: get-timestamp
+        run: echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_OUTPUT"
+
   build-zip:
     name: Build zip file
     runs-on: ubuntu-latest
+    needs: once
     steps:
       - name: Clone deepin-m1 repository 
         uses: actions/checkout@v2
@@ -19,4 +34,27 @@ jobs:
       - name: Prepare debootstrap script
         run: sudo cp /usr/share/debootstrap/scripts/bookworm /usr/share/debootstrap/scripts/beige
       - name: Build zip files
-        run: sudo bash bootstrap.sh
+        run: bash bootstrap.sh
+      - name: Upload deepin-base artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepin-base-${{ needs.once.outputs.TIMESTAMP }}
+          compression-level: 0
+          path: build/deepin-base.zip
+      - name: Upload deepin-desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepin-desktop-${{ needs.once.outputs.TIMESTAMP }}
+          compression-level: 0
+          path: build/deepin-desktop.zip
+      - name: Split desktop zip on release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: zip -s 2g build/deepin-desktop.zip --out deepin-desktop
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: false
+          files: |
+            build/deepin-base.zip
+            deepin-desktop.z*

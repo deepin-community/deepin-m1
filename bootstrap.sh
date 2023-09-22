@@ -18,67 +18,67 @@ MIRROR=https://community-packages.deepin.com/beige/
 build_rootfs()
 {
 (
-        mkdir -p cache
+    mkdir -p cache
 	sudo mount -o loop media testing
 	sudo eatmydata ${DEBOOTSTRAP} --keyring /usr/share/keyrings/deepin-archive-camel-keyring.gpg --cache-dir=`pwd`/cache --arch=arm64 --include bash-completion,clang,fish,pciutils,wpasupplicant,vim,tmux,curl,wget,grub-efi-arm64,ca-certificates,sudo,openssh-client,gdisk,cryptsetup,wireless-regdb,zsh,zstd beige testing $MIRROR
 
-        cd testing
+    cd testing
 
-        sudo mkdir -p boot/efi/m1n1 etc/X11/xorg.conf.d
+    sudo mkdir -p boot/efi/m1n1 etc/X11/xorg.conf.d
 
-        sudo bash -c 'echo deepin > etc/hostname'
+    sudo bash -c 'echo deepin > etc/hostname'
 
-	sudo cat ../../files/sources.list > etc/apt/sources.list
+	sudo bash -c "cat ../../files/sources.list > etc/apt/sources.list"
 
 	sudo chroot . apt update
 	sudo chroot . apt upgrade -y
 
-        sudo cp ../../files/glanzmann.list etc/apt/sources.list.d/
-        sudo cp ../../files/thomas-glanzmann.gpg etc/apt/trusted.gpg.d/
-        sudo cp ../../files/hosts etc/hosts
-        sudo cp ../../files/resolv.conf etc/resolv.conf
-        sudo cp ../../files/quickstart.txt root/
-        sudo cp ../../files/interfaces etc/network/interfaces
-        sudo cp ../../files/wpa.conf etc/wpa_supplicant/wpa_supplicant.conf
-        sudo cp ../../files/rc.local etc/rc.local
-        sudo cp ../../files/30-modeset.conf etc/X11/xorg.conf.d/30-modeset.conf
-        sudo cp ../../files/blacklist.conf etc/modprobe.d/
+    sudo cp ../../files/glanzmann.list etc/apt/sources.list.d/
+    sudo cp ../../files/thomas-glanzmann.gpg etc/apt/trusted.gpg.d/
+    sudo cp ../../files/hosts etc/hosts
+    sudo cp ../../files/resolv.conf etc/resolv.conf
+    sudo cp ../../files/quickstart.txt root/
+    sudo cp ../../files/interfaces etc/network/interfaces
+    sudo cp ../../files/wpa.conf etc/wpa_supplicant/wpa_supplicant.conf
+    sudo cp ../../files/rc.local etc/rc.local
+    sudo cp ../../files/30-modeset.conf etc/X11/xorg.conf.d/30-modeset.conf
+    sudo cp ../../files/blacklist.conf etc/modprobe.d/
 
-        sudo cp ../../files/grub etc/default/grub
-        sudo -- perl -p -i -e 's/root:x:/root::/' etc/passwd
+    sudo cp ../../files/grub etc/default/grub
+    sudo -- perl -p -i -e 's/root:x:/root::/' etc/passwd
 
-        sudo -- ln -s lib/systemd/systemd init
-        sudo chroot . apt update
-        sudo chroot . apt install -y linux-firmware m1n1 linux-headers-6.3.0-asahi-g9b2b1bc8174e linux-image-6.3.0-asahi-g9b2b1bc8174e
-        sudo chroot . apt clean
-        sudo rm var/lib/apt/lists/* || true
+    sudo -- ln -s lib/systemd/systemd init
+    sudo chroot . apt update
+    sudo chroot . apt install -y linux-firmware m1n1 linux-headers-6.3.0-asahi-g9b2b1bc8174e linux-image-6.3.0-asahi-g9b2b1bc8174e
+    sudo chroot . apt clean
+    sudo rm var/lib/apt/lists/* || true
 )
 }
 
 build_dd()
 {
 (
-        rm -f media
-        fallocate -l 15G media
-        mkdir -p testing
-        mkfs.ext4 media
-        tune2fs -O extents,uninit_bg,dir_index -m 0 -c 0 -i 0 media
-        sudo mount -o loop media testing
-        sudo rm -rf testing/init testing/boot/efi/m1n1
-        sudo umount testing
+    sudo rm -f media
+    fallocate -l 15G media
+    mkdir -p testing
+    mkfs.ext4 media
+    tune2fs -O extents,uninit_bg,dir_index -m 0 -c 0 -i 0 media
+    sudo mount -o loop media testing
+    sudo rm -rf testing/init testing/boot/efi/m1n1
+    sudo umount testing
 )
 }
 
 build_efi()
 {
 (
-        rm -rf EFI
-        mkdir -p EFI/boot EFI/debian
+    sudo rm -rf EFI
+    mkdir -p EFI/boot EFI/debian
 	cp testing/usr/lib/grub/arm64-efi/monolithic/grubaa64.efi EFI/boot/bootaa64.efi
-        export INITRD=`ls -1 testing/boot/ | grep initrd`
-        export VMLINUZ=`ls -1 testing/boot/ | grep vmlinuz`
-        export UUID=`blkid -s UUID -o value media`
-        cat > EFI/debian/grub.cfg <<EOF
+    export INITRD=`ls -1 testing/boot/ | grep initrd`
+    export VMLINUZ=`ls -1 testing/boot/ | grep vmlinuz`
+    export UUID=`blkid -s UUID -o value media`
+    cat > EFI/debian/grub.cfg <<EOF
 search.fs_uuid ${UUID} root
 linux (\$root)/boot/${VMLINUZ} root=UUID=${UUID} rw net.ifnames=0 usbcore.autosuspend=-1
 initrd (\$root)/boot/${INITRD}
@@ -90,14 +90,14 @@ EOF
 build_asahi_installer_image()
 {
 (
-        rm -rf aii
-        mkdir -p aii/esp/m1n1
-        cp -a EFI aii/esp/
-        cp testing/usr/lib/m1n1/boot.bin aii/esp/m1n1/boot.bin
-        ln media aii/media
-	sudo umount media
-        cd aii
-        zip -r9 ../deepin-base.zip esp media
+   sudo rm -rf aii
+   mkdir -p aii/esp/m1n1
+   cp -a EFI aii/esp/
+   cp testing/usr/lib/m1n1/boot.bin aii/esp/m1n1/boot.bin
+   ln media aii/media
+   sudo umount media
+   cd aii
+   zip -r9 ../deepin-base.zip esp media
 )
 }
 
@@ -122,17 +122,17 @@ build_desktop_rootfs_image()
 	sudo umount -l ${CHROOT}/dev/pts
 	sudo umount -l ${CHROOT}/sys
 
-        sudo rm -rf ${CHROOT}/init ${CHROOT}/boot/efi/m1n1
+    sudo rm -rf ${CHROOT}/init ${CHROOT}/boot/efi/m1n1
 	
-	rm -rf aii
-        mkdir -p aii/esp/m1n1
-        cp -a EFI aii/esp/
-        cp testing/usr/lib/m1n1/boot.bin aii/esp/m1n1/boot.bin
-        sudo umount ${CHROOT}
+	sudo rm -rf aii
+    mkdir -p aii/esp/m1n1
+    cp -a EFI aii/esp/
+    cp testing/usr/lib/m1n1/boot.bin aii/esp/m1n1/boot.bin
+    sudo umount ${CHROOT}
 
-        ln media aii/media
-        cd aii
-        zip -r9 ../deepin-desktop.zip esp media
+    ln media aii/media
+    cd aii
+    zip -r9 ../deepin-desktop.zip esp media
 }
 
 mkdir -p build
