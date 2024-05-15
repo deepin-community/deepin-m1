@@ -30,7 +30,9 @@ jobs:
           tar -xvf deepin-keyring_2021.06.07.orig.tar.xz
           sudo cp deepin-keyring-2021.06.07/keyrings/deepin-archive-camel-keyring.gpg /usr/share/keyrings/deepin-archive-camel-keyring.gpg
       - name: Install dependencies
-        run: sudo apt install qemu qemu-user-static binfmt-support eatmydata debootstrap pigz
+        run: |
+          sudo apt update
+          sudo apt install qemu qemu-user-static binfmt-support eatmydata debootstrap pigz
       - name: Prepare debootstrap script
         run: sudo cp /usr/share/debootstrap/scripts/bookworm /usr/share/debootstrap/scripts/beige
       - name: Build zip files
