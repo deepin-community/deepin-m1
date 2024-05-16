@@ -51,7 +51,11 @@ jobs:
           path: build/deepin-desktop.zip
       - name: Split desktop zip on release
         if: startsWith(github.ref, 'refs/tags/')
-        run: zip -s 2g build/deepin-desktop.zip --out deepin-desktop
+        run: |
+          rm build/deepin-desktop.zip
+          cd build/aii
+          zip -s 2000m -r9 ../deepin-desktop.zip esp media
+          cd ../..
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
@@ -59,4 +63,4 @@ jobs:
           draft: false
           files: |
             build/deepin-base.zip
-            deepin-desktop.z*
+            build/deepin-desktop.z*
