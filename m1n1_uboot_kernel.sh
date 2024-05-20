@@ -9,40 +9,41 @@ set -o xtrace
 
 cd "$(dirname "$0")"
 
-export CARGO_HOME="$HOME/.cargo/bin"
-export LLVM_HOME="/usr/lib/llvm-14/bin"
-export PATH=$CARGO_HOME:$LLVM_HOME:$PATH
+export CARGO_HOME="$(pwd)/build/cargo"
+export RUSTUP_HOME="$(pwd)/build/rust"
+source "$(pwd)/build/cargo/env"
 
 unset LC_CTYPE
 unset LANG
 
-handle_crosscompile()
-{
-        if [ "`uname -m`" != 'aarch64' ]; then
-                export ARCH=arm64
-                export CROSS_COMPILE=aarch64-linux-gnu-
-                sudo apt install -y libc6-dev-arm64-cross
-        fi
-}
+export M1N1_VERSION=1.4.14
+export KERNEL_VERSION=asahi-6.8.9-1
+export UBOOT_VERSION=asahi-v2024.04-1
+export ARCH=arm64
 
 build_linux()
 {
 (
-        handle_crosscompile
-        test -d linux || git clone --depth=1 -b asahi-6.3-13 https://github.com/AsahiLinux/linux
+        test -d linux || git clone https://github.com/AsahiLinux/linux
         cd linux
+        git fetch -a -t
+        git reset --hard $KERNEL_VERSION
+        git clean -f -x -d > /dev/null
         cat ../../config.txt > .config
-        make LLVM=${CLANG_VERSION} rustavailable
-        make LLVM=${CLANG_VERSION} olddefconfig
-        make -j `nproc` LLVM=${CLANG_VERSION} V=0 bindeb-pkg > /dev/null
+        make LLVM=-15 rustavailable
+        make LLVM=-15 olddefconfig
+        make -j `nproc` LLVM=-15 V=0 bindeb-pkg > /dev/null
 )
 }
 
 build_m1n1()
 {
 (
-        test -d m1n1 || git clone --depth=1 -b v1.2.9 --recursive https://github.com/AsahiLinux/m1n1
+        test -d m1n1 || git clone --recursive https://github.com/AsahiLinux/m1n1
         cd m1n1
+        git fetch -a -t
+        git reset --hard v${M1N1_VERSION};
+        git clean -f -x -d > /dev/null
         make -j `nproc`
 )
 }
@@ -50,9 +51,11 @@ build_m1n1()
 build_uboot()
 {
 (
-        handle_crosscompile
-        test -d u-boot || git clone --depth=1 -b asahi-v2023.04-2 https://github.com/AsahiLinux/u-boot
+        test -d u-boot || git clone https://github.com/AsahiLinux/u-boot
         cd u-boot
+        git fetch -a -t
+        git reset --hard $UBOOT_VERSION
+        git clean -f -x -d > /dev/null
 
         make apple_m1_defconfig
         make -j `nproc`
@@ -63,7 +66,6 @@ build_uboot()
 package_boot_bin()
 {
 (
-        export M1N1_VERSION=1.2.9
         rm -rf m1n1_${M1N1_VERSION}_arm64
         mkdir -p m1n1_${M1N1_VERSION}_arm64/DEBIAN m1n1_${M1N1_VERSION}_arm64/usr/lib/m1n1/
         cp u-boot.bin m1n1_${M1N1_VERSION}_arm64/usr/lib/m1n1/boot.bin
@@ -93,12 +95,6 @@ EOF
         dpkg-deb --build m1n1_${M1N1_VERSION}_arm64
 )
 }
-
-if type clang-14; then
-        export CLANG_VERSION=-14
-elif type clang-11; then
-        export CLANG_VERSION=-11
-fi
 
 mkdir -p build
 cd build

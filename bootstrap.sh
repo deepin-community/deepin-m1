@@ -43,15 +43,16 @@ build_rootfs()
     sudo cp ../../files/rc.local etc/rc.local
     sudo cp ../../files/30-modeset.conf etc/X11/xorg.conf.d/30-modeset.conf
     sudo cp ../../files/blacklist.conf etc/modprobe.d/
+    sudo cp ../../files/99linux etc/apt/preferences.d/
 
     sudo cp ../../files/grub etc/default/grub
     sudo -- perl -p -i -e 's/root:x:/root::/' etc/passwd
 
     sudo -- ln -s lib/systemd/systemd init
     sudo chroot . apt update
-    sudo chroot . apt install -y linux-firmware m1n1 linux-headers-6.3.0-asahi-g9b2b1bc8174e linux-image-6.3.0-asahi-g9b2b1bc8174e
+    sudo chroot . apt install -y linux-firmware m1n1 linux-image-6.6.0-asahi-00905-gbd0a1a7d465f
     sudo chroot . apt clean
-    sudo rm var/lib/apt/lists/* || true
+    sudo rm -r var/lib/apt/lists/* || true
 )
 }
 
@@ -111,12 +112,15 @@ build_desktop_rootfs_image()
 	sudo chroot testing apt update
 	sudo chroot testing env DEBIAN_FRONTEND=noninteractive apt install -y lightdm xserver-xorg deepin-desktop-environment-cli deepin-desktop-environment-core deepin-desktop-environment-base deepin-desktop-environment-extras libssl-dev firefox
 	sudo chroot testing apt clean
-	sudo rm testing/var/lib/apt/lists/* || true
+	sudo rm -r testing/var/lib/apt/lists/* || true
 
 	sudo chroot testing useradd -m -s /bin/bash hiweed
 	sudo chroot testing usermod -aG sudo hiweed
 	echo "Set passwd for default user hiweed"
 	sudo chroot testing bash -c 'echo -e "1\n1" | passwd hiweed'
+    
+    # Fix network issues
+    sudo sed -i 's/managed=false/managed=true/' testing/etc/NetworkManager/NetworkManager.conf
 
 	sudo umount -l ${CHROOT}/proc
 	sudo umount -l ${CHROOT}/dev/pts
