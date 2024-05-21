@@ -1,0 +1,22 @@
+name: Build m1n1 uboot kernel
+
+on:
+    push:
+jobs:
+     build:
+         runs-on: ubuntu-latest
+         steps:
+             - uses: actions/checkout@v4
+             - name: Build m1n1 ubbot and kernel in the container
+               run: |
+                   docker run \
+                   -v ${{ github.workspace }}:/sources \
+                   linuxdeepin/deepin /bin/bash -c '''
+                       cd /sources;
+                       bash dependencies.sh;
+                       bash prepare_rust.sh;
+                       bash m1n1_uboot_kernel.sh;
+                   '''
+             - uses: actions/upload-artifact@v4
+               with:
+                   path: ${{ github.workspace }}/build/*.deb
