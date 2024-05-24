@@ -49,18 +49,3 @@ jobs:
           name: deepin-desktop-${{ needs.once.outputs.TIMESTAMP }}
           compression-level: 0
           path: build/deepin-desktop.zip
-      - name: Split desktop zip on release
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          rm build/deepin-desktop.zip
-          cd build/aii
-          zip -s 2000m -r9 ../deepin-desktop.zip esp media
-          cd ../..
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          draft: false
-          files: |
-            build/deepin-base.zip
-            build/deepin-desktop.z*

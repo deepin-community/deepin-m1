@@ -43,14 +43,14 @@ build_rootfs()
     sudo cp ../../files/rc.local etc/rc.local
     sudo cp ../../files/30-modeset.conf etc/X11/xorg.conf.d/30-modeset.conf
     sudo cp ../../files/blacklist.conf etc/modprobe.d/
-    sudo cp ../../files/99linux etc/apt/preferences.d/
+    sudo cp ../../files/99asahi etc/apt/preferences.d/
 
     sudo cp ../../files/grub etc/default/grub
     sudo -- perl -p -i -e 's/root:x:/root::/' etc/passwd
 
     sudo -- ln -s lib/systemd/systemd init
     sudo chroot . apt update
-    sudo chroot . apt install -y linux-firmware m1n1 linux-image-6.6.0-asahi-00905-gbd0a1a7d465f
+    sudo chroot . apt install -y linux-firmware m1n1 linux-image-6.8.9-asahi-00986-g07e14ab5bcf6
     sudo chroot . apt clean
     sudo rm -r var/lib/apt/lists/* || true
 )
@@ -110,17 +110,22 @@ build_desktop_rootfs_image()
 	sudo mount devpts-live -t devpts -o gid=5,mode=620 ${CHROOT}/dev/pts || true
 	sudo mount sysfs-live -t sysfs ${CHROOT}/sys
 	sudo chroot testing apt update
-	sudo chroot testing env DEBIAN_FRONTEND=noninteractive apt install -y lightdm xserver-xorg deepin-desktop-environment-cli deepin-desktop-environment-core deepin-desktop-environment-base deepin-desktop-environment-extras libssl-dev firefox
+	sudo chroot testing env DEBIAN_FRONTEND=noninteractive apt install -y lightdm xserver-xorg deepin-desktop-environment-cli deepin-desktop-environment-core deepin-desktop-environment-base deepin-desktop-environment-extras libssl-dev firefox deepin-installer
 	sudo chroot testing apt clean
 	sudo rm -r testing/var/lib/apt/lists/* || true
 
-	sudo chroot testing useradd -m -s /bin/bash hiweed
-	sudo chroot testing usermod -aG sudo hiweed
-	echo "Set passwd for default user hiweed"
-	sudo chroot testing bash -c 'echo -e "1\n1" | passwd hiweed'
+	# sudo chroot testing useradd -m -s /bin/bash hiweed
+	# sudo chroot testing usermod -aG sudo hiweed
+	# echo "Set passwd for default user hiweed"
+	# sudo chroot testing bash -c 'echo -e "1\n1" | passwd hiweed'
     
     # Fix network issues
     sudo sed -i 's/managed=false/managed=true/' testing/etc/NetworkManager/NetworkManager.conf
+    # Enable deepin-installer-first-boot and disable deepin-installer
+    sudo chroot testing sed -i 's/no-first-boot/default/g' /usr/share/deepin-installer/configs/settings/default_settings.ini
+    sudo chroot testing ln -s /usr/lib/systemd/system/deepin-installer-first-boot.service /etc/systemd/system/basic.target.wants/deepin-installer-first-boot.service
+    sudo chroot testing rm /etc/systemd/system/basic.target.wants/deepin-installer.service
+
 
 	sudo umount -l ${CHROOT}/proc
 	sudo umount -l ${CHROOT}/dev/pts
@@ -132,7 +137,7 @@ build_desktop_rootfs_image()
     mkdir -p aii/esp/m1n1
     cp -a EFI aii/esp/
     cp testing/usr/lib/m1n1/boot.bin aii/esp/m1n1/boot.bin
-    sudo umount ${CHROOT}
+    sudo umount -l ${CHROOT}
 
     ln media aii/media
     cd aii

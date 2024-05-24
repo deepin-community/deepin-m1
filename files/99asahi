@@ -1,3 +1,3 @@
-Package: linux-*
+Package: *
 Pin: release v=2023,n=asahi,l=Deepin,c=main,b=arm64
 Pin-Priority: 900
