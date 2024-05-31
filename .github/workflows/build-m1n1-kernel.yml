@@ -7,7 +7,7 @@ jobs:
          runs-on: ubuntu-latest
          steps:
              - uses: actions/checkout@v4
-             - name: Build m1n1 ubbot and kernel in the container
+             - name: Build m1n1 uboot and kernel in the container
                run: |
                    docker run \
                    -v ${{ github.workspace }}:/sources \

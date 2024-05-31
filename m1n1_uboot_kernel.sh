@@ -19,7 +19,6 @@ unset LANG
 export M1N1_VERSION=1.4.14
 export KERNEL_VERSION=asahi-6.8.9-6
 export UBOOT_VERSION=asahi-v2024.04-1
-export ARCH=arm64
 
 build_linux()
 {
@@ -32,7 +31,7 @@ build_linux()
         cat ../../config.txt > .config
         make LLVM=-15 rustavailable
         make LLVM=-15 olddefconfig
-        make -j `nproc` LLVM=-15 V=0 bindeb-pkg > /dev/null
+        make -j `nproc` LLVM=-15 V=0 ARCH=arm64 bindeb-pkg > /dev/null
 )
 }
 
@@ -44,6 +43,10 @@ build_m1n1()
         git fetch -a -t
         git reset --hard v${M1N1_VERSION};
         git clean -f -x -d > /dev/null
+
+        if [ $(arch) != "aarch64" ]; then
+            export CROSS_COMPILE=aarch64-linux-gnu-
+        fi
         make -j `nproc`
 )
 }
@@ -56,6 +59,10 @@ build_uboot()
         git fetch -a -t
         git reset --hard $UBOOT_VERSION
         git clean -f -x -d > /dev/null
+
+        if [ $(arch) != "aarch64" ]; then
+            export CROSS_COMPILE=aarch64-linux-gnu-
+        fi
 
         make apple_m1_defconfig
         make -j `nproc`
