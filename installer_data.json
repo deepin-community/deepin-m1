@@ -1,38 +1,12 @@
 {
     "os_list": [
         {
-            "name": "Deepin v23 Base",
-            "default_os_name": "Deepin",
-            "boot_object": "m1n1.bin",
-            "next_object": "m1n1/boot.bin",
-            "package": "deepin-base.zip",
-            "supported_fw": ["12.3", "12.4"],
-            "partitions": [
-                {
-                    "name": "EFI",
-                    "type": "EFI",
-                    "size": "512MB",
-                    "format": "fat",
-                    "copy_firmware": true,
-                    "copy_installer_data": true,
-                    "source": "esp"
-                },
-                {
-                    "name": "Root",
-                    "type": "Linux",
-                    "size": "15GB",
-                    "expand": true,
-                    "image": "media"
-                }
-            ]
-        },
-	{
             "name": "Deepin v23 Desktop",
             "default_os_name": "Deepin",
             "boot_object": "m1n1.bin",
             "next_object": "m1n1/boot.bin",
             "package": "deepin-desktop.zip",
-            "supported_fw": ["12.3", "12.4"],
+            "supported_fw": ["12.3", "12.4", "13.5"],
             "partitions": [
                 {
                     "name": "EFI",

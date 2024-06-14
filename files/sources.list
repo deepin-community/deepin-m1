@@ -1,4 +1,5 @@
-deb https://community-packages.deepin.com/beige/ beige main commercial community
+# deb https://community-packages.deepin.com/beige/ beige main commercial community
+deb [trusted=yes] https://ci.deepin.com/repo/deepin/deepin-community/stable/ beige main community commercial 
 # deb [trusted=yes] https://ci.deepin.com/repo/obs/deepin:/Develop:/main/standard/ ./
 # deb [trusted=yes] https://ci.deepin.com/repo/obs/deepin:/Develop:/dde/deepin_develop/ ./
 # deb [trusted=yes] https://ci.deepin.com/repo/obs/deepin:/Develop:/community/deepin_develop/ ./

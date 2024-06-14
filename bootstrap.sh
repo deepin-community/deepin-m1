@@ -50,7 +50,7 @@ build_rootfs()
 
     sudo -- ln -s lib/systemd/systemd init
     sudo chroot . apt update
-    sudo chroot . apt install -y linux-firmware m1n1 linux-image-6.8.9-asahi-00986-g07e14ab5bcf6
+    sudo chroot . apt install -y linux-firmware m1n1 linux-image-asahi
     sudo chroot . apt clean
     sudo rm -r var/lib/apt/lists/* || true
 )
@@ -105,12 +105,12 @@ build_asahi_installer_image()
 build_desktop_rootfs_image()
 {
 	CHROOT=testing
-	sudo mount -o loop media ${CHROOT}
+	sudo mount -o loop media ${CHROOT} || echo
 	sudo mount proc-live -t proc ${CHROOT}/proc
 	sudo mount devpts-live -t devpts -o gid=5,mode=620 ${CHROOT}/dev/pts || true
 	sudo mount sysfs-live -t sysfs ${CHROOT}/sys
 	sudo chroot testing apt update
-	sudo chroot testing env DEBIAN_FRONTEND=noninteractive apt install -y lightdm xserver-xorg deepin-desktop-environment-cli deepin-desktop-environment-core deepin-desktop-environment-base deepin-desktop-environment-extras libssl-dev firefox deepin-installer
+	sudo chroot testing env DEBIAN_FRONTEND=noninteractive apt install -y $(grep -Ev "^linux" ../files/filesystem.packages | awk '{print $1}')
 	sudo chroot testing apt clean
 	sudo rm -r testing/var/lib/apt/lists/* || true
 
@@ -123,6 +123,8 @@ build_desktop_rootfs_image()
     sudo sed -i 's/managed=false/managed=true/' testing/etc/NetworkManager/NetworkManager.conf
     # Enable deepin-installer-first-boot and disable deepin-installer
     sudo chroot testing sed -i 's/no-first-boot/default/g' /usr/share/deepin-installer/configs/settings/default_settings.ini
+    sudo chroot testing sed -i 's/test//g' /usr/share/deepin-installer/tools/deepin-installer-first-boot-preinit
+    sudo chroot testing sed -i 's/update_apt_sources/# update_apt_sources/g' /usr/share/deepin-installer/tools/hooks/first_boot/14_cleanup_system.job
     sudo chroot testing ln -s /usr/lib/systemd/system/deepin-installer-first-boot.service /etc/systemd/system/basic.target.wants/deepin-installer-first-boot.service
     sudo chroot testing rm /etc/systemd/system/basic.target.wants/deepin-installer.service
 
@@ -150,5 +152,5 @@ cd build
 build_dd
 build_rootfs
 build_efi
-build_asahi_installer_image
+# build_asahi_installer_image
 build_desktop_rootfs_image

@@ -37,12 +37,6 @@ jobs:
         run: sudo cp /usr/share/debootstrap/scripts/bookworm /usr/share/debootstrap/scripts/beige
       - name: Build zip files
         run: bash bootstrap.sh
-      - name: Upload deepin-base artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: deepin-base-${{ needs.once.outputs.TIMESTAMP }}
-          compression-level: 0
-          path: build/deepin-base.zip
       - name: Upload deepin-desktop artifacts
         uses: actions/upload-artifact@v4
         with:
