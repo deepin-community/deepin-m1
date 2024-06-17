@@ -35,11 +35,13 @@ jobs:
           sudo apt install qemu qemu-user-static binfmt-support eatmydata debootstrap pigz
       - name: Prepare debootstrap script
         run: sudo cp /usr/share/debootstrap/scripts/bookworm /usr/share/debootstrap/scripts/beige
+      - name: Skip zip steps for disk space
+        run: sed -i "s/zip/#/g" bootstrap.sh
       - name: Build zip files
         run: bash bootstrap.sh
       - name: Upload deepin-desktop artifacts
         uses: actions/upload-artifact@v4
         with:
           name: deepin-desktop-${{ needs.once.outputs.TIMESTAMP }}
-          compression-level: 0
-          path: build/deepin-desktop.zip
+          compression-level: 9
+          path: build/aii/*
