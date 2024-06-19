@@ -1,5 +1,9 @@
 # deepin-m1
 
+[![Build rootfs](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml)
+
+[English](README_en.md)
+
 ## 重要参考资料
 
 Asahi Linux: https://asahilinux.org/
@@ -19,13 +23,13 @@ Asahi Linux Debian installer: https://git.zerfleddert.de/cgi-bin/gitweb.cgi/m1-d
 - [ ] 内核补丁
     - 将上游适配 m1 的补丁和驱动应用到 deepin 维护的内核
 - [x] 打包可支持M1 GPU的Mesa修改版
-    - [ ] 内核正确开启模块 appledrm
-    - [ ] 窗管特效支持M1 GPU
+    - [x] 内核正确开启模块 appledrm
+    - [x] 窗管特效支持M1 GPU
 - [ ] 驱动扬声器
     - [ ] 内核正确开启模块 snd_soc_macaudio
 - [x] 启动DDE桌面
-- [ ] 图形化安装向导
-    - [ ] 在 mac 上运行的安装 deepin 的向导程序
+- [x] 图形化安装向导
+    - [ ] 开启了安装器用户配置程序
 - [x] arm 仓库
     - 目前 deepin v23 已有 arm64 仓库
 
@@ -52,7 +56,14 @@ deepin ci仓库有提供现成的安装脚本。当然，你也可以通过自�
 
 如果你不怕麻烦的话，也可以通过仅安装官方m1n1+uboot引导的方式，通过插入写好特制内容的deepin安装盘进行安装。
 
-### 使用Deepin的安装仓库
+当前可用的安装方式：
+
+- 使用在线安装脚本
+  - 使用deepin官方仓库
+  - 自行搭建安装仓库
+- 安装UEFI后，使用USB安装盘安装
+
+### 1. 使用deepin安装仓库
 
 在MacOS上打开Terminal，然后，运行以下命令执行安装脚本。
 
@@ -60,16 +71,27 @@ deepin ci仓库有提供现成的安装脚本。当然，你也可以通过自�
 curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | sh
 ```
 
-- 注意，跑完脚本后，它会让你关机．(Mac Mini)开机时，长摁开机键直至出现启动菜单．选择deepin，然后跟着脚本走来设置deepin为默认的启动项．
-- deepin系统默认用户 hiweed, 密码为 1
+- 注意，跑完脚本后，它会让你关机．(Mac Mini)开机时，**长摁开机键**直至出现启动菜单．选择deepin，然后跟着脚本走来设置deepin为默认的启动项．
+- ~~deepin系统默认用户 hiweed, 密码为 1~~
+- 当前，在用户配置时可以新建用户。**root用户依旧是无密码可自动登录**。
 
+### 2. 自行搭建安装仓库
 
+#### 准备工作
 
-### 自行搭建安装仓库
+安装所需的rootfs既可以下现成打包好的，也可以自行打包（定制）。
 
-##### 准备工作
+##### 使用预先打包好的rootfs
 
-- 打rootfs包的系统暂时只试过Linux (deepin V20, deepin V23, Arch Linux)，没试过Mac OS本地能否打包．
+[![Build rootfs](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml)
+
+目前仓库的github action会每周一自动打rootfs.可以在成功完成了的工作流页面底下找到下载链接。
+
+https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml
+
+##### 自行打包rootfs
+
+- 打rootfs包的系统暂时只试过Linux (deepin V20, deepin V23, Arch Linux)，没试过Mac OS本地能否打包．具体打包流程可以参考 .github/workflows/build-rootfs.yml
 
 - 安装必要的打rootfs包依赖：
 
@@ -89,10 +111,7 @@ curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | s
   - 获取keyring: /usr/share/keyrings/deepin-archive-camel-keyring.gpg．非deepin发行版可以通过解包deepin-keyring包获得．
   - (Arch或其他非Debian衍生发行版) /usr/share/debootstrap/scripts/debian-common中，需要屏蔽添加usr-is-merged依赖的那一段switch-case块．
 
-##### 搭建仓库
-
-
-当前仅从Thomas Glanzmann的Asahi Linux Debian安装器仓库修改了bootstrap脚本生成rootfs压缩包．(如果想和上游对比的话，可以自行开启．打包时默认屏蔽掉了．) 
+#### 搭建仓库
 
 首先，因为安装脚本是在线安装模式的，所以需要先搭建一个安装仓库（推荐为http，其他的没试过，比如本地方式．听justforlxz说本地的话，会在其中某一步挂掉．我还没尝试）(**使用python的http.server搭建的服务器是无法被安装脚本使用的，本人试过了．后面用的apache2的http服务**)
 
@@ -120,7 +139,7 @@ curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | s
 
 
 
-### 使用deepin 23 for M1安装盘
+### 3. 使用deepin 23 for M1安装盘
 
 这里所说的deepin安装盘可**不是给通常机器安装使用的iso镜像盘。**只需要在U盘上**创建一个FAT分区**并**将安装内容写入根目录**即可。
 
@@ -141,7 +160,7 @@ curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | s
 
   - 在[这里](https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin-m1-usb-installer.zip)下载安装盘压缩包，并解压到**U盘FAT分区**的**根目录**。
 
-- 在Mac上安装m1n1+uboot引导。(Asahi Linux官方安装脚本选第三项UEFI environment only, m1n1+uboot+esp)
+- 在Mac上安装m1n1+uboot引导。(Asahi Linux官方安装脚本选 UEFI environment only, m1n1+uboot+esp)
 
   ```bash
   curl https://alx.sh/ | sh
@@ -167,30 +186,21 @@ curl https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin.install | s
 
 base包的话，大概需要安装dde-session-ui, deepin-desktop-environment-core, deepin-desktop-environment-base, dde-session-shell, libssl-dev　(libssl的打包有问题，没有提供libssl.so，需要修)
 
-当前默认用户hiweed，密码为1
+~~当前默认用户hiweed，密码为1~~ 现在可以第一次启动时，创建新用户。
 
 (从deepin-base包安装桌面环境时，可能可以使用声音，但重启之后失效。)
 
-同时，当前桌面环境存在以下已知问题：
+## 已知问题
 
-- 系统GPU加速无法使用，可能导致一些应用发生异常。例如，Chromium无法正常启动。
+- X86交叉编译的m1n1, uboot和内核均无法使用。CI 构建仅供编译流程参考，不能实际安装使用。
 - 系统无法识别任何声音设备，导致无声音播放功能。只有小概率下，刚安装完成时才会有声音。
 - USB安装方式只能使用自定义安装，不能动任何已有分区。否则机器会变砖。
-- 如果长时间不动鼠标，会导致其被休眠而无法使用。这个时候需要点击鼠标按键才能重新使用。
-- 重启后桌面无壁纸
-- 插入网线，显示网线未接入
 - 没有休眠功能
-- 引导界面按键盘无响应
-- 时间显示错误，没有同步时间
-- 没有蓝牙模块，且蓝牙不可用
-- 系统版本为 beta,但是控制中心出现更新 beta版本的发布日志更新
 - 应用商店中无应用
 - 修改亮度无效果
 - 调节色温无效果
 - 深度之家标题栏错位重叠
-- 无线网络未识别，无法使用
 - 文件管理器中无法挂载其他操作系统的分区
-- 桌面异常卡死
 
 ## FAQ
 
