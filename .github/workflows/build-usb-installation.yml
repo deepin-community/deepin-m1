@@ -1,0 +1,69 @@
+name: Build USB Installation Archive
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * mon'
+
+jobs:
+  once:
+    name: Generate Envs
+    runs-on: ubuntu-latest
+    outputs:
+        timestamp: ${{ steps.get-timestamp.outputs.timestamp }}
+    steps:
+      - name: get timestamp
+        id: get-timestamp
+        run: echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_OUTPUT"
+
+  build-zip:
+    name: Build archive
+    runs-on: ubuntu-latest
+    needs: once
+    steps:
+      - name: Clone deepin-m1 repository 
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install qemu qemu-user-static binfmt-support overlayroot squashfs-tools p7zip-full
+      - name: Get base ISO file
+        run: |
+          wget https://cdimage.deepin.com/releases/23-RC2/arm64/deepin-desktop-community-23-preview-arm64.iso
+          curl https://cdimage.deepin.com/releases/23-RC2/arm64/MD5SUMS | md5sum -c
+      - name: Configure chroot
+        run: |
+         7z x deepin-desktop-community-23-preview-arm64.iso -oiso-files
+         rm deepin-desktop-community-23-preview-arm64.iso
+         cd iso-files/live
+         mkdir -pv lower
+         sudo mount -o loop filesystem.squashfs lower
+         mkdir -pv to workdir squashfs-root
+         sudo mount -t overlay -o lowerdir=lower,upperdir=to,workdir=workdir overlay squashfs-root
+         sudo cp ${{ github.workspace }}/files/sources.list squashfs-root/etc/apt/
+         sudo cp ${{ github.workspace }}/files/99asahi squashfs-root/etc/apt/preferences.d/
+         sudo cp ${{ github.workspace }}/files/30-modeset.conf squashfs-root/etc/X11/xorg.conf.d/30-modeset.conf
+
+         sudo chroot squashfs-root bash -c '
+           echo "nameserver 1.1.1.1" > /etc/resolv.conf
+           apt purge linux-image-deepin-arm64
+           apt update
+           apt upgrade -y
+           apt install linux-image-asahi linux-libc-dev
+           apt clean
+         '
+         
+         sudo mksquashfs squashfs-root filesystem.squashfs.1 -comp xz -Xbcj x86,arm
+         sudo umount squashfs-root
+         sudo umount lower
+         sudo rm -rf lower to workdir squashfs-root
+         sudo mv filesystem.squashfs.1 filesystem.squashfs
+         cd ${{ github.workspace }}/iso-files/
+         7z a -mx=9 ${{ github.workspace }}/deepin-m1-usb.7z .
+      - name: Upload deepin-desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepin-m1-usb-${{ needs.once.outputs.TIMESTAMP }}
+          compression-level: 0
+          path: deepin-m1-usb.7z
