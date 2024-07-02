@@ -152,7 +152,7 @@ Steps to create the installation disk are as followings:
     sudo mount ${DEVICE}1 /mnt
     ```
 
-  - Download the installation disk archive from [here](https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin-m1-usb-installer.zip) and extract it to the **root directory** of the **USB drive's FAT partition**.
+  - Download the installation disk archive from [here](https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin-m1-usb-installer.zip) or [Build USB Installation Archive workflow](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml) and extract it to the **root directory** of the **USB drive's FAT partition**.
 
 - **Install m1n1 + U-Boot Bootloader on Mac**. (In the Asahi Linux official installation script, select the  option: UEFI environment only, m1n1 + U-Boot + ESP)
 
@@ -189,7 +189,12 @@ For the base package, it generally requires installing the following: dde-sessio
 - Changing brightness has no effect.
 - Adjusting color temperature has no effect.
 - Misalignment and overlapping in the Deepin Home application title bar.
-- Unable to mount partitions of other operating systems in the file manager.
+- Unable to mount partitions of other operating systems in the file manager. (Needs linux-apfs installed in order to mount filesystems from MacOS. Currently, this package is not in official sources)
+- [Mouse cursor disappeared in screen recording](https://github.com/linuxdeepin/developer-center/issues/9391)
+- [Unable to set custom shortcuts](https://github.com/linuxdeepin/developer-center/issues/9397)
+- [Cannot open uos ai](https://github.com/linuxdeepin/developer-center/issues/9395)
+- [Updating in control center shows backuping forever](https://github.com/linuxdeepin/developer-center/issues/9393)
+- [Cursor blinking](https://github.com/linuxdeepin/developer-center/issues/9390)
 
 ## FAQ
 

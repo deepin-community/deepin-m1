@@ -158,7 +158,7 @@ https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml
     sudo mount ${DEVICE}1 /mnt
     ```
 
-  - 在[这里](https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin-m1-usb-installer.zip)下载安装盘压缩包，并解压到**U盘FAT分区**的**根目录**。
+  - 在[这里](https://ci.deepin.com/repo/deepin/deepin-ports/deepin-m1/deepin-m1-usb-installer.zip) 或者[Build USB Installation Archive 工作流](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml)下载安装盘压缩包，并解压到**U盘FAT分区**的**根目录**。
 
 - 在Mac上安装m1n1+uboot引导。(Asahi Linux官方安装脚本选 UEFI environment only, m1n1+uboot+esp)
 
@@ -200,7 +200,12 @@ base包的话，大概需要安装dde-session-ui, deepin-desktop-environment-cor
 - 修改亮度无效果
 - 调节色温无效果
 - 深度之家标题栏错位重叠
-- 文件管理器中无法挂载其他操作系统的分区
+- 文件管理器中无法挂载其他操作系统的分区 (需要安装linux-apfs才能挂载苹果的文件系统，暂时没有打包)
+- [开启录屏，进行录屏时鼠标消失](https://github.com/linuxdeepin/developer-center/issues/9391)
+- [自定义设置快捷键失效](https://github.com/linuxdeepin/developer-center/issues/9397)
+- [uos ai打不开](https://github.com/linuxdeepin/developer-center/issues/9395)
+- [控制中心更新一直显示备份中](https://github.com/linuxdeepin/developer-center/issues/9393)
+- [光标会自动闪动](https://github.com/linuxdeepin/developer-center/issues/9390)
 
 ## FAQ
 
