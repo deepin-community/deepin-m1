@@ -17,7 +17,7 @@ unset LC_CTYPE
 unset LANG
 
 export M1N1_VERSION=1.4.14
-export KERNEL_VERSION=asahi-6.8.9-6
+export KERNEL_VERSION=asahi-6.9.9-5
 export UBOOT_VERSION=asahi-v2024.04-1
 
 build_linux()
