@@ -5,6 +5,7 @@ adduser	3.131-1deepin2
 adwaita-icon-theme	45.0-2
 alsa-topology-conf	1.2.5.1-2
 alsa-ucm-conf	1.2.10-1
+alsa-ucm-conf-asahi 5-1
 alsa-utils	1.2.6-deepin
 apt	2.7.12deepin1
 apt-utils	2.7.12deepin1
