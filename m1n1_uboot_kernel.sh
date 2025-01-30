@@ -16,9 +16,9 @@ source "$(pwd)/build/cargo/env"
 unset LC_CTYPE
 unset LANG
 
-export M1N1_VERSION=1.4.14
-export KERNEL_VERSION=asahi-6.9.9-5
-export UBOOT_VERSION=asahi-v2024.04-1
+export M1N1_VERSION=1.4.19
+export KERNEL_VERSION=asahi-6.12.10-2
+export UBOOT_VERSION=asahi-v2024.10-1
 
 build_linux()
 {
