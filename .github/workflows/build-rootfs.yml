@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install qemu qemu-user-static binfmt-support eatmydata debootstrap pigz
+          sudo apt install qemu-user-static eatmydata debootstrap pigz
       - name: Prepare debootstrap script
         run: sudo cp /usr/share/debootstrap/scripts/bookworm /usr/share/debootstrap/scripts/beige
       - name: Skip zip steps for disk space
