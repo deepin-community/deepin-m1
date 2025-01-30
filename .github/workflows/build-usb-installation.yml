@@ -19,7 +19,7 @@ jobs:
 
   build-zip:
     name: Build archive
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs: once
     steps:
       - name: Clone deepin-m1 repository 
@@ -27,15 +27,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install qemu qemu-user-static binfmt-support overlayroot squashfs-tools p7zip-full
+          sudo apt install overlayroot squashfs-tools p7zip-full
       - name: Get base ISO file
         run: |
-          wget https://cdimage.deepin.com/releases/23-RC2/arm64/deepin-desktop-community-23-preview-arm64.iso
-          curl https://cdimage.deepin.com/releases/23-RC2/arm64/MD5SUMS | md5sum -c
+          wget https://cdimage.deepin.com/releases/23/arm64/deepin-desktop-community-23-arm64.iso
+          curl https://cdimage.deepin.com/releases/23/arm64/MD5SUMS | md5sum -c
       - name: Configure chroot
         run: |
-         7z x deepin-desktop-community-23-preview-arm64.iso -oiso-files
-         rm deepin-desktop-community-23-preview-arm64.iso
+         7z x deepin-desktop-community-23-arm64.iso -oiso-files
+         rm deepin-desktop-community-23-arm64.iso
          cd iso-files/live
          mkdir -pv lower
          sudo mount -o loop filesystem.squashfs lower
