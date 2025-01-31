@@ -17,7 +17,7 @@ unset LC_CTYPE
 unset LANG
 
 export M1N1_VERSION=1.4.19
-export KERNEL_VERSION=asahi-6.12.10-2
+export KERNEL_VERSION=asahi-6.12.12-1
 export UBOOT_VERSION=asahi-v2024.10-1
 
 build_linux()
@@ -29,9 +29,9 @@ build_linux()
         git reset --hard $KERNEL_VERSION
         git clean -f -x -d > /dev/null
         cat ../../config.txt > .config
-        make LLVM=-15 rustavailable
-        make LLVM=-15 olddefconfig
-        make -j `nproc` LLVM=-15 V=0 ARCH=arm64 bindeb-pkg > /dev/null
+        make LLVM=-18 rustavailable
+        make LLVM=-18 olddefconfig
+        make -j `nproc` LLVM=-18 V=0 ARCH=arm64 bindeb-pkg > /dev/null
 )
 }
 

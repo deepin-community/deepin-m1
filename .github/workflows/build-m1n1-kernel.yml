@@ -4,14 +4,14 @@ on:
     push:
 jobs:
      build:
-         runs-on: ubuntu-latest
+         runs-on: ubuntu-24.04-arm
          steps:
              - uses: actions/checkout@v4
              - name: Build m1n1 uboot and kernel in the container
                run: |
                    docker run \
                    -v ${{ github.workspace }}:/sources \
-                   linuxdeepin/deepin /bin/bash -c '''
+                   linuxdeepin/deepin:beige-arm64-v1.4.0 /bin/bash -c '''
                        cd /sources;
                        bash dependencies.sh;
                        bash prepare_rust.sh;
