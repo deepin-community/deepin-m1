@@ -1,6 +1,8 @@
 # deepin-m1
 
 [![Build rootfs](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml)
+[![Build USB Installation Archive](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml)
+[![Build m1n1 uboot kernel](https://github.com/deepin-community/deepin-m1/actions/workflows/build-m1n1-kernel.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-m1n1-kernel.yml)
 
 [English](README_en.md)
 
@@ -140,6 +142,7 @@ https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml
 
 
 ### 3. 使用deepin 23 for M1安装盘
+[![Build USB Installation Archive](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml)
 
 这里所说的deepin安装盘可**不是给通常机器安装使用的iso镜像盘。**只需要在U盘上**创建一个FAT分区**并**将安装内容写入根目录**即可。
 

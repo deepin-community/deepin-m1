@@ -1,7 +1,8 @@
 # deepin-m1
 
 [![Build rootfs](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-rootfs.yml)
-
+[![Build USB Installation Archive](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml)
+[![Build m1n1 uboot kernel](https://github.com/deepin-community/deepin-m1/actions/workflows/build-m1n1-kernel.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-m1n1-kernel.yml)
 [中文](README.md)
 
 ## Important References
@@ -134,6 +135,7 @@ After setting up the repository, refer to the [official tutorial](https://asahil
 2. **Follow the script's instructions**. :)
 
 ### 3. Using the deepin 23 for M1 Installation Disk
+[![Build USB Installation Archive](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml/badge.svg)](https://github.com/deepin-community/deepin-m1/actions/workflows/build-usb-installation.yml)
 
 The deepin installation disk mentioned here is **not the usual ISO image used for standard machines.** You only need to **create a FAT partition on a USB drive** and **write the installation content to the root directory**.
 
@@ -158,6 +160,7 @@ Steps to create the installation disk are as followings:
 
   ```bash
   curl https://alx.sh/ | sh
+  ```
 
 - Follow the script's instructions to install the boot system and set it as the default boot option.
 - Insert an USB drive and boot as usual. If the USB drive is not recognized, run `usb reset` command in the U-Boot interface to refresh.
