@@ -2,10 +2,20 @@ name: Build rootfs
 
 on:
   push:
+    paths:
+      - 'dependencies.sh'
+      - 'bootstrap.sh'
+      - 'files/**'
+      - '.github/workflows/build-rootfs.yml'
   pull_request:
+    paths:
+      - 'dependencies.sh'
+      - 'bootstrap.sh'
+      - 'files/**'
+      - '.github/workflows/build-rootfs.yml'
   schedule:
     - cron: '0 6 * * mon'
-
+  workflow_dispatch:
 jobs:
   once:
     name: Generate Envs

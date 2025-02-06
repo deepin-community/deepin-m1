@@ -2,10 +2,16 @@ name: Build USB Installation Archive
 
 on:
   push:
+    paths:
+      - 'files/**'
+      - '.github/workflows/build-usb-installation.yml'
   pull_request:
+    paths:
+      - 'files/**'
+      - '.github/workflows/build-usb-installation.yml'
   schedule:
     - cron: '0 6 * * mon'
-
+  workflow_dispatch:
 jobs:
   once:
     name: Generate Envs

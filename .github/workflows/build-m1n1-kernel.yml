@@ -2,6 +2,18 @@ name: Build m1n1 uboot kernel
 
 on:
     push:
+      paths:
+        - 'dependencies.sh'
+        - 'prepare_rust.sh'
+        - 'm1n1_uboot_kernel.sh'
+        - '.github/workflows/build-m1n1-kernel.yml'
+    pull_request:
+      paths:
+        - 'dependencies.sh'
+        - 'prepare_rust.sh'
+        - 'm1n1_uboot_kernel.sh'
+        - '.github/workflows/build-m1n1-kernel.yml'
+    workflow_dispatch:
 jobs:
      build:
          runs-on: ubuntu-24.04-arm
